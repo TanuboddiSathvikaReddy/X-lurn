@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>X-Lurn — Exchange Skills, Earn Time Credits</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#05060a;--bg2:#090b11;--bg3:#0d1018;--bg4:#131720;--bg5:#181d28;--border:rgba(99,115,165,.12);--border2:rgba(99,115,165,.22);--border3:rgba(99,115,165,.35);--text:#e2e6f3;--sub:#7a839e;--muted:#3d4459;--blue:#4d7cfe;--blue2:#6b95ff;--blueg:rgba(77,124,254,.1);--blueg2:rgba(77,124,254,.18);--green:#1fd98a;--greeng:rgba(31,217,138,.08);--amber:#f5a623;--amberg:rgba(245,166,35,.08);--red:#ff4d6a;--redg:rgba(255,77,106,.08);--purple:#9b6dff;--purpleg:rgba(155,109,255,.08);--gold:#ffd166;--cyan:#38d9f5;--cyang:rgba(56,217,245,.08)}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
+body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;min-height:100vh}
+a{text-decoration:none;color:inherit}input,select,button,textarea{font-family:'Syne',sans-serif}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes scan{from{transform:translateX(-100%)}to{transform:translateX(400%)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(77,124,254,.4)}70%{box-shadow:0 0 0 8px rgba(77,124,254,0)}}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes glow-pulse{0%,100%{opacity:.4}50%{opacity:.8}}
+@keyframes pulse2{0%,100%{box-shadow:0 0 0 0 rgba(77,124,254,.4)}70%{box-shadow:0 0 0 8px rgba(77,124,254,0)}}
+.fade-up{animation:fadeUp .4s ease both}.fade-up:nth-child(1){animation-delay:.05s}.fade-up:nth-child(2){animation-delay:.1s}.fade-up:nth-child(3){animation-delay:.15s}.fade-up:nth-child(4){animation-delay:.2s}
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 48px;background:rgba(5,6,10,.8);backdrop-filter:blur(24px);border-bottom:1px solid var(--border)}
+.nav::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(77,124,254,.3),rgba(155,109,255,.3),transparent)}
+.nav-logo{display:flex;align-items:center;gap:10px}.nav-logo-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--blue),var(--purple));border-radius:10px;display:grid;place-items:center;font-size:16px;position:relative;overflow:hidden}.nav-logo-icon::after{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);animation:scan 3s ease infinite}
+.nav-logo-name{font-size:17px;font-weight:800;letter-spacing:.3px}.nav-links{display:flex;align-items:center;gap:32px}.nav-links a{font-size:13px;color:var(--sub);font-weight:500;transition:color .15s;letter-spacing:.3px}.nav-links a:hover{color:var(--text)}
+.nav-cta{display:flex;gap:10px;align-items:center}
+.btn-nav-ghost{padding:8px 20px;border:1px solid var(--border2);border-radius:10px;font-size:13px;font-weight:600;color:var(--sub);cursor:pointer;background:transparent;font-family:inherit;transition:all .15s}.btn-nav-ghost:hover{border-color:var(--border3);color:var(--text);background:var(--bg3)}
+.btn-nav-solid{padding:8px 20px;border:none;border-radius:10px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;background:linear-gradient(135deg,var(--blue),#3a5fd4);font-family:inherit;transition:transform .15s,box-shadow .15s;box-shadow:0 4px 16px rgba(77,124,254,.25)}.btn-nav-solid:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(77,124,254,.35)}
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:120px 48px 80px}
+.hero-bg{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(77,124,254,.14) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 80% 80%,rgba(155,109,255,.08) 0%,transparent 50%),radial-gradient(ellipse 40% 30% at 10% 60%,rgba(31,217,138,.06) 0%,transparent 50%)}
+.hero-bg::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(77,124,254,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(77,124,254,.04) 1px,transparent 1px);background-size:48px 48px}
+.orb{position:absolute;border-radius:50%;filter:blur(60px);pointer-events:none;animation:glow-pulse 4s ease-in-out infinite}
+.orb-1{width:300px;height:300px;background:rgba(77,124,254,.12);top:-100px;left:-100px}.orb-2{width:200px;height:200px;background:rgba(155,109,255,.1);bottom:10%;right:5%;animation-delay:1.5s}.orb-3{width:150px;height:150px;background:rgba(31,217,138,.08);top:40%;right:25%;animation-delay:3s}
+.hero-content{max-width:720px;text-align:center;position:relative;z-index:1;animation:fadeUp .8s ease both}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(77,124,254,.08);border:1px solid rgba(77,124,254,.2);border-radius:20px;padding:6px 16px;font-size:12px;font-weight:600;color:var(--blue2);margin-bottom:32px;font-family:'JetBrains Mono',monospace;letter-spacing:.5px}
+.hero-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+.hero-title{font-size:clamp(42px,7vw,72px);font-weight:800;line-height:1.05;letter-spacing:-2px;margin-bottom:24px}
+.hero-title span{background:linear-gradient(135deg,var(--blue2),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:18px;color:var(--sub);font-weight:400;line-height:1.7;margin-bottom:48px;max-width:540px;margin-left:auto;margin-right:auto}
+.hero-ctas{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:64px}
+.btn-hero-primary{padding:14px 36px;background:linear-gradient(135deg,var(--blue),#3a5fd4);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;letter-spacing:.2px;box-shadow:0 8px 32px rgba(77,124,254,.3);transition:transform .15s,box-shadow .15s;position:relative;overflow:hidden}
+.btn-hero-primary::after{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent);transition:left .4s}
+.btn-hero-primary:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(77,124,254,.4)}.btn-hero-primary:hover::after{left:200%}
+.btn-hero-ghost{padding:14px 36px;background:transparent;color:var(--text);border:1px solid var(--border2);border-radius:12px;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .15s}.btn-hero-ghost:hover{border-color:var(--border3);background:var(--bg2)}
+.hero-stats{display:flex;gap:48px;justify-content:center;flex-wrap:wrap}
+.hero-stat-num{font-size:32px;font-weight:800;font-family:'JetBrains Mono',monospace;letter-spacing:-1px;line-height:1;margin-bottom:4px}
+.hero-stat-num.blue{color:var(--blue2)}.hero-stat-num.green{color:var(--green)}.hero-stat-num.purple{color:var(--purple)}
+.hero-stat-lbl{font-size:12px;color:var(--muted);font-weight:500;letter-spacing:.5px}
+.ticker-wrap{overflow:hidden;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:14px 0;background:var(--bg2);position:relative}
+.ticker-wrap::before,.ticker-wrap::after{content:'';position:absolute;top:0;bottom:0;width:80px;z-index:2}
+.ticker-wrap::before{left:0;background:linear-gradient(90deg,var(--bg2),transparent)}.ticker-wrap::after{right:0;background:linear-gradient(-90deg,var(--bg2),transparent)}
+.ticker{display:flex;gap:0;white-space:nowrap;animation:ticker 30s linear infinite}
+.ticker-item{display:inline-flex;align-items:center;gap:8px;padding:0 32px;font-size:13px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.ticker-item span{color:var(--text);font-weight:600}.ticker-dot{width:4px;height:4px;border-radius:50%;background:var(--muted)}
+.section{padding:100px 48px;max-width:1100px;margin:0 auto}
+.section-label{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue2);font-family:'JetBrains Mono',monospace;margin-bottom:16px}
+.section-title{font-size:clamp(32px,5vw,48px);font-weight:800;letter-spacing:-1.5px;line-height:1.1;margin-bottom:16px}
+.section-sub{font-size:16px;color:var(--sub);font-weight:400;line-height:1.7;max-width:520px}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:64px}
+.step{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:32px;position:relative;overflow:hidden;transition:border-color .2s,transform .2s}
+.step:hover{border-color:var(--border2);transform:translateY(-4px)}
+.step::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.step:nth-child(1)::before{background:linear-gradient(90deg,var(--blue),transparent)}.step:nth-child(2)::before{background:linear-gradient(90deg,var(--purple),transparent)}.step:nth-child(3)::before{background:linear-gradient(90deg,var(--green),transparent)}
+.step-num{font-size:11px;font-weight:700;letter-spacing:1.5px;font-family:'JetBrains Mono',monospace;color:var(--muted);margin-bottom:16px}
+.step-icon{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font-size:22px;margin-bottom:20px}
+.step:nth-child(1) .step-icon{background:var(--blueg2)}.step:nth-child(2) .step-icon{background:var(--purpleg)}.step:nth-child(3) .step-icon{background:var(--greeng)}
+.step-title{font-size:18px;font-weight:700;margin-bottom:10px;letter-spacing:-.3px}.step-desc{font-size:14px;color:var(--sub);line-height:1.7;font-weight:400}
+.trust-section{padding:80px 48px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--bg2)}
+.trust-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.trust-features{display:flex;flex-direction:column;gap:24px;margin-top:40px}
+.trust-feature{display:flex;gap:16px;align-items:flex-start;padding:20px;border-radius:14px;border:1px solid var(--border);background:var(--bg3);transition:border-color .2s}.trust-feature:hover{border-color:var(--border2)}
+.tf-icon{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;font-size:18px;flex-shrink:0}
+.tf-title{font-size:14px;font-weight:700;margin-bottom:4px}.tf-desc{font-size:13px;color:var(--sub);line-height:1.6;font-weight:400}
+.score-card{background:var(--bg3);border:1px solid var(--border2);border-radius:20px;padding:28px;position:relative;overflow:hidden;animation:float 6s ease-in-out infinite}
+.score-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--blue),var(--purple))}
+.sc-title{font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:20px;text-transform:uppercase}
+.sc-user{display:flex;align-items:center;gap:14px;margin-bottom:24px}
+.sc-avatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--blueg2),var(--purpleg));border:2px solid rgba(77,124,254,.3);display:grid;place-items:center;font-size:18px;font-weight:800;color:var(--blue2)}
+.sc-name{font-size:16px;font-weight:700}.sc-handle{font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:2px}
+.sc-score-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.sc-score-lbl{font-size:12px;color:var(--sub);font-family:'JetBrains Mono',monospace}
+.sc-score-val{font-size:24px;font-weight:800;color:var(--purple);font-family:'JetBrains Mono',monospace;letter-spacing:-1px}
+.sc-bar-track{height:6px;background:var(--bg5);border-radius:10px;overflow:hidden;margin-bottom:20px}
+.sc-bar-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--purple));border-radius:10px;width:72%;box-shadow:0 0 8px rgba(77,124,254,.4)}
+.sc-chips{display:flex;flex-wrap:wrap;gap:6px}
+.sc-chip{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.sc-chip.verified{background:rgba(255,209,102,.08);color:var(--gold);border:1px solid rgba(255,209,102,.2)}.sc-chip.blue{background:var(--blueg);color:var(--blue2);border:1px solid rgba(77,124,254,.2)}.sc-chip.green{background:var(--greeng);color:var(--green);border:1px solid rgba(31,217,138,.2)}
+.skills-section{padding:80px 0;overflow:hidden}
+.skills-title{text-align:center;font-size:13px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;font-family:'JetBrains Mono',monospace;margin-bottom:32px}
+.marquee-row{display:flex;gap:12px;margin-bottom:12px}
+.marquee-row:nth-child(1) .marquee-inner{animation:ticker 25s linear infinite}.marquee-row:nth-child(2) .marquee-inner{animation:ticker 20s linear infinite reverse}
+.marquee-inner{display:flex;gap:12px;white-space:nowrap}
+.skill-pill{padding:8px 18px;border-radius:20px;font-size:13px;font-weight:600;border:1px solid var(--border2);background:var(--bg2);color:var(--sub);white-space:nowrap;flex-shrink:0}
+.cta-section{padding:120px 48px;text-align:center;position:relative;overflow:hidden;border-top:1px solid var(--border)}
+.cta-section::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 50%,rgba(77,124,254,.1) 0%,transparent 70%);pointer-events:none}
+.cta-title{font-size:clamp(32px,5vw,52px);font-weight:800;letter-spacing:-1.5px;margin-bottom:16px;position:relative;z-index:1}
+.cta-sub{font-size:16px;color:var(--sub);max-width:460px;margin:0 auto 40px;line-height:1.7;font-weight:400;position:relative;z-index:1}
+.footer{padding:40px 48px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:13px}
+.footer-logo{display:flex;align-items:center;gap:8px;font-weight:700;color:var(--sub)}
+.register-page{min-height:100vh;display:grid;grid-template-columns:1fr 1fr}
+.register-left{background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;justify-content:center;padding:80px 64px;position:relative;overflow:hidden}
+.register-left::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 0% 50%,rgba(77,124,254,.1) 0%,transparent 60%);pointer-events:none}
+.register-left::after{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(77,124,254,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(77,124,254,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none}
+.rl-content{position:relative;z-index:1}
+.rl-badge{display:inline-flex;align-items:center;gap:8px;background:var(--blueg);border:1px solid rgba(77,124,254,.2);border-radius:20px;padding:6px 14px;font-size:11px;font-weight:700;color:var(--blue2);font-family:'JetBrains Mono',monospace;letter-spacing:.5px;margin-bottom:28px}
+.rl-title{font-size:clamp(28px,3.5vw,42px);font-weight:800;letter-spacing:-1.5px;line-height:1.1;margin-bottom:16px}
+.rl-title span{background:linear-gradient(135deg,var(--blue2),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.rl-desc{font-size:15px;color:var(--sub);line-height:1.7;margin-bottom:40px;font-weight:400}
+.rl-perks{display:flex;flex-direction:column;gap:14px}
+.rl-perk{display:flex;align-items:center;gap:12px;font-size:14px;color:var(--sub);font-weight:500}
+.rl-perk-icon{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;font-size:16px;flex-shrink:0}
+.register-right{display:flex;align-items:center;justify-content:center;padding:60px 64px;background:var(--bg)}
+.register-form-wrap{width:100%;max-width:420px}
+.reg-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:40px}
+.reg-nav-logo{display:flex;align-items:center;gap:9px}
+.reg-nav-logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--blue),var(--purple));border-radius:9px;display:grid;place-items:center;font-size:14px}
+.reg-nav-logo-name{font-size:15px;font-weight:800}
+.reg-nav-signin{font-size:13px;color:var(--sub)}.reg-nav-signin a{color:var(--blue2);font-weight:600}
+.reg-title{font-size:26px;font-weight:800;letter-spacing:-.5px;margin-bottom:6px}
+.reg-sub{font-size:14px;color:var(--sub);margin-bottom:32px;font-weight:400}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:8px;font-family:'JetBrains Mono',monospace}
+.field input{width:100%;padding:12px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;font-family:inherit;transition:border-color .2s,box-shadow .2s,background .2s}
+.field input::placeholder{color:var(--muted)}.field input:focus{outline:none;border-color:var(--blue);background:var(--bg4);box-shadow:0 0 0 3px var(--blueg)}
+.field-hint{font-size:11px;color:var(--muted);margin-top:6px;font-family:'JetBrains Mono',monospace}
+.proof-section{border:1px solid var(--border);border-left:2px solid var(--purple);border-radius:10px;padding:16px;margin-bottom:16px;background:rgba(155,109,255,.04)}
+.proof-section p{font-size:10px;color:var(--purple);margin-bottom:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;font-family:'JetBrains Mono',monospace}
+.auth-btn{width:100%;padding:13px;border:none;border-radius:10px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;letter-spacing:.2px;margin-top:8px;background:linear-gradient(135deg,var(--blue),#3a5fd4);color:#fff;box-shadow:0 4px 24px rgba(77,124,254,.25);transition:transform .15s,box-shadow .15s;position:relative;overflow:hidden}
+.auth-btn::after{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent);transition:left .4s}
+.auth-btn:hover{transform:translateY(-1px);box-shadow:0 8px 32px rgba(77,124,254,.35)}.auth-btn:hover::after{left:200%}
+.auth-switch{text-align:center;margin-top:20px;font-size:13px;color:var(--sub)}.auth-switch a{color:var(--blue2);font-weight:600}
+.msg-err{background:var(--redg);border:1px solid rgba(255,77,106,.2);border-left:2px solid var(--red);color:#ff8096;padding:11px 16px;border-radius:9px;font-size:13px;margin-bottom:16px}
+.msg-ok{background:var(--greeng);border:1px solid rgba(31,217,138,.2);border-left:2px solid var(--green);color:#4de8a0;padding:11px 16px;border-radius:9px;font-size:13px;margin-bottom:16px}
+.login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:var(--bg)}
+.login-page::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 50% at 50% -10%,rgba(77,124,254,.13) 0%,transparent 60%),radial-gradient(ellipse 50% 40% at 90% 90%,rgba(155,109,255,.07) 0%,transparent 50%);pointer-events:none}
+.login-page::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(77,124,254,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(77,124,254,.03) 1px,transparent 1px);background-size:48px 48px;pointer-events:none}
+.login-card{width:420px;position:relative;z-index:1;background:var(--bg2);border:1px solid var(--border2);border-radius:24px;padding:48px 44px;box-shadow:0 0 0 1px rgba(77,124,254,.06),0 40px 80px rgba(0,0,0,.6);animation:fadeUp .5s ease both}
+.login-card::before{content:'';position:absolute;top:0;left:20%;right:20%;height:1px;background:linear-gradient(90deg,transparent,var(--blue),transparent);opacity:.5}
+.login-logo{display:flex;align-items:center;gap:12px;margin-bottom:40px}
+.login-logo-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--blue),var(--purple));border-radius:12px;display:grid;place-items:center;font-size:18px;position:relative;overflow:hidden}
+.login-logo-icon::after{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);animation:scan 3s ease infinite}
+.login-logo-name{font-size:18px;font-weight:800;letter-spacing:.3px}
+.login-logo-tag{font-size:9px;font-weight:500;color:var(--muted);letter-spacing:2px;text-transform:uppercase;font-family:'JetBrains Mono',monospace}
+.login-title{font-size:26px;font-weight:800;letter-spacing:-.5px;margin-bottom:6px}
+.login-sub{font-size:14px;color:var(--sub);margin-bottom:32px;font-weight:400}
+.topbar{position:sticky;top:0;z-index:50;height:58px;background:rgba(9,11,17,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 28px;display:flex;align-items:center;justify-content:space-between}
+.topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(77,124,254,.3),transparent)}
+.t-logo{display:flex;align-items:center;gap:10px}
+.t-logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--blue),var(--purple));border-radius:9px;display:grid;place-items:center;font-size:15px}
+.t-logo-name{font-size:16px;font-weight:800;letter-spacing:.3px}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.sign-out{font-size:12px;color:var(--muted);padding:6px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;font-family:'JetBrains Mono',monospace;transition:all .15s}.sign-out:hover{color:var(--red);border-color:rgba(255,77,106,.3);background:var(--redg)}
+.chip{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;font-family:'JetBrains Mono',monospace;letter-spacing:.3px}
+.chip-blue{background:var(--blueg2);color:var(--blue2);border:1px solid rgba(77,124,254,.25)}.chip-gray{background:var(--bg4);color:var(--sub);border:1px solid var(--border)}.chip-green{background:var(--greeng);color:var(--green);border:1px solid rgba(31,217,138,.2)}.chip-amber{background:var(--amberg);color:var(--amber);border:1px solid rgba(245,166,35,.2)}
+.tab-bar{display:flex;align-items:center;padding:0 28px;background:rgba(9,11,17,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);overflow-x:auto;gap:0}.tab-bar::-webkit-scrollbar{display:none}
+.tab{padding:15px 20px;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:color .15s,border-color .15s;letter-spacing:1px;text-transform:uppercase;font-family:'JetBrains Mono',monospace;user-select:none}.tab:hover{color:var(--sub)}.tab.active{color:var(--blue2);border-bottom-color:var(--blue)}
+.tab-badge{display:inline-flex;align-items:center;justify-content:center;background:var(--red);color:#fff;border-radius:20px;padding:1px 6px;font-size:9px;margin-left:6px;animation:pulse2 2s infinite}
+.page{display:none;padding:32px 28px;max-width:1000px;margin:0 auto}.page.active{display:block;animation:fadeUp .3s ease both}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:32px}
+.stat{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:24px;position:relative;overflow:hidden;transition:border-color .2s,transform .2s}.stat:hover{border-color:var(--border2);transform:translateY(-2px)}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}.stat::after{content:'';position:absolute;bottom:-20px;right:-10px;width:80px;height:80px;border-radius:50%;opacity:.04}
+.stat.s-blue::before{background:linear-gradient(90deg,var(--blue),transparent)}.stat.s-blue::after{background:var(--blue)}.stat.s-blue .stat-num{color:var(--blue2)}
+.stat.s-amber::before{background:linear-gradient(90deg,var(--amber),transparent)}.stat.s-amber::after{background:var(--amber)}.stat.s-amber .stat-num{color:var(--amber)}
+.stat.s-green::before{background:linear-gradient(90deg,var(--green),transparent)}.stat.s-green::after{background:var(--green)}.stat.s-green .stat-num{color:var(--green)}
+.stat.s-purple::before{background:linear-gradient(90deg,var(--purple),transparent)}.stat.s-purple::after{background:var(--purple)}.stat.s-purple .stat-num{color:var(--purple)}
+.stat-lbl{font-size:9px;color:var(--muted);font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px;font-family:'JetBrains Mono',monospace}
+.stat-num{font-size:40px;font-weight:800;letter-spacing:-2px;line-height:1;font-family:'JetBrains Mono',monospace}
+.profile-header{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:32px;margin-bottom:20px;display:flex;align-items:center;gap:28px;position:relative;overflow:hidden}
+.profile-header::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--blue),var(--purple),transparent)}
+.profile-header::after{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;background:radial-gradient(circle,rgba(77,124,254,.06) 0%,transparent 70%)}
+.avatar{width:72px;height:72px;background:linear-gradient(135deg,var(--blueg2),var(--purpleg));border:2px solid rgba(77,124,254,.3);border-radius:50%;display:grid;place-items:center;font-size:26px;font-weight:800;color:var(--blue2);flex-shrink:0;position:relative;z-index:1}
+.profile-name{font-size:22px;font-weight:800;letter-spacing:-.3px;margin-bottom:10px}.profile-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.profile-stats{display:flex;gap:32px;margin-left:auto;position:relative;z-index:1}
+.ps-item{text-align:center}.ps-val{font-size:26px;font-weight:700;font-family:'JetBrains Mono',monospace;letter-spacing:-1px;line-height:1}.ps-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;margin-top:4px;font-family:'JetBrains Mono',monospace}
+.legit-bar-wrap{background:var(--bg2);border:1px solid var(--border);border-top:2px solid var(--purple);border-radius:16px;padding:22px 28px;margin-bottom:20px;position:relative;overflow:hidden}
+.legit-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.legit-title{font-size:13px;font-weight:700}.legit-detail{font-size:10px;color:var(--muted);margin-top:2px;letter-spacing:.5px;font-family:'JetBrains Mono',monospace}
+.legit-score{font-size:30px;font-weight:700;color:var(--purple);font-family:'JetBrains Mono',monospace;letter-spacing:-1px}.legit-score span{font-size:14px;color:var(--muted)}
+.legit-track{height:5px;background:var(--bg5);border-radius:10px;overflow:hidden;margin-bottom:10px}.legit-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--purple));border-radius:10px;transition:width .8s cubic-bezier(.4,0,.2,1);box-shadow:0 0 8px rgba(77,124,254,.4)}
+.legit-labels{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:.5px}
+.sec-title{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.8px;margin-bottom:14px;margin-top:28px;font-family:'JetBrains Mono',monospace;display:flex;align-items:center;gap:10px}.sec-title::after{content:'';flex:1;height:1px;background:var(--border)}.sec-title:first-child{margin-top:0}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:16px;transition:border-color .2s}.card:hover{border-color:var(--border2)}
+.card.accent-blue{border-top:2px solid var(--blue)}.card.accent-green{border-top:2px solid var(--green)}.card.accent-amber{border-top:2px solid var(--amber)}.card.accent-purple{border-top:2px solid var(--purple)}.card.accent-cyan{border-top:2px solid var(--cyan)}.card.accent-gold{border-top:2px solid var(--gold)}.card.accent-red{border-top:2px solid var(--red)}
+.card-head{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;background:var(--bg3);border-bottom:1px solid var(--border);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;font-family:'JetBrains Mono',monospace;color:var(--sub)}
+.card-badge{font-size:10px;color:var(--muted);background:var(--bg5);padding:2px 10px;border-radius:20px;border:1px solid var(--border);font-family:'JetBrains Mono',monospace}
+table{width:100%;border-collapse:collapse}th{padding:11px 22px;text-align:left;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace}
+td{padding:13px 22px;font-size:13px;color:var(--sub);border-bottom:1px solid rgba(255,255,255,.025)}tr:last-child td{border-bottom:none}tr{transition:background .1s}tr:hover td{background:rgba(77,124,254,.03)}
+.td-name{color:var(--text);font-weight:600}.td-mono{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--sub)}.empty-row td{text-align:center;color:var(--muted);padding:40px;font-family:'JetBrains Mono',monospace;font-size:12px}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap;font-family:'JetBrains Mono',monospace;letter-spacing:.3px}
+.b-pending{background:var(--amberg);color:var(--amber);border:1px solid rgba(245,166,35,.2)}.b-assigned{background:var(--blueg);color:var(--blue2);border:1px solid rgba(77,124,254,.2)}.b-completed{background:var(--greeng);color:var(--green);border:1px solid rgba(31,217,138,.2)}.b-disputed{background:var(--redg);color:var(--red);border:1px solid rgba(255,77,106,.2)}.b-active{background:var(--cyang);color:var(--cyan);border:1px solid rgba(56,217,245,.2)}.b-trusted{background:var(--greeng);color:var(--green);border:1px solid rgba(31,217,138,.2)}.b-beginner{background:var(--blueg);color:var(--blue2);border:1px solid rgba(77,124,254,.2)}.b-stuck{background:var(--amberg);color:var(--amber);border:1px solid rgba(245,166,35,.2)}.b-verified{background:rgba(255,209,102,.08);color:var(--gold);border:1px solid rgba(255,209,102,.2)}.b-held{background:var(--amberg);color:var(--amber);border:1px solid rgba(245,166,35,.2)}.b-released{background:var(--greeng);color:var(--green);border:1px solid rgba(31,217,138,.2)}.b-refunded{background:var(--redg);color:var(--red);border:1px solid rgba(255,77,106,.2)}.b-provider{background:var(--greeng);color:var(--green);border:1px solid rgba(31,217,138,.2)}.b-requester{background:var(--blueg);color:var(--blue2);border:1px solid rgba(77,124,254,.2)}
+.skill-chips{display:flex;flex-wrap:wrap;gap:8px}.skill-chip{display:inline-flex;align-items:center;gap:6px;background:var(--blueg);color:var(--blue2);border:1px solid rgba(77,124,254,.2);padding:5px 13px;border-radius:20px;font-size:12px;font-weight:600;transition:all .15s}.skill-chip:hover{background:var(--blueg2);border-color:rgba(77,124,254,.4)}.skill-chip.verified{background:rgba(255,209,102,.06);color:var(--gold);border-color:rgba(255,209,102,.2)}
+.form-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:28px;margin-bottom:16px;position:relative;overflow:hidden;transition:border-color .2s}.form-card:hover{border-color:var(--border2)}
+.form-card-title{font-size:16px;font-weight:700;margin-bottom:6px;letter-spacing:-.2px}.form-card-sub{font-size:13px;color:var(--sub);margin-bottom:24px;line-height:1.7;font-weight:400}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.form-group label{display:block;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:8px;font-family:'JetBrains Mono',monospace}
+.form-group input,.form-group select{width:100%;padding:11px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:13px;font-family:inherit;transition:border-color .15s,box-shadow .15s,background .15s}
+.form-group input::placeholder{color:var(--muted)}.form-group input:focus,.form-group select:focus{outline:none;border-color:var(--blue);background:var(--bg4);box-shadow:0 0 0 3px var(--blueg)}.form-group select option{background:var(--bg3)}
+.form-footer{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.fb{font-size:12px;font-weight:600;font-family:'JetBrains Mono',monospace}.fb-ok{color:var(--green)}.fb-err{color:var(--red)}
+.btn{padding:10px 22px;border:none;border-radius:10px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;letter-spacing:.2px;transition:transform .12s,box-shadow .12s,opacity .12s;position:relative;overflow:hidden}
+.btn::after{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);transition:left .4s}.btn:hover::after{left:200%}.btn:hover{transform:translateY(-1px)}.btn:active{transform:translateY(0);opacity:.9}
+.btn-blue{background:linear-gradient(135deg,var(--blue),#3a5fd4);color:#fff;box-shadow:0 4px 16px var(--blueg2)}.btn-green{background:linear-gradient(135deg,#17b86e,#0f9057);color:#fff;box-shadow:0 4px 16px var(--greeng)}.btn-red{background:linear-gradient(135deg,#e03048,#b0202e);color:#fff;box-shadow:0 4px 16px var(--redg)}.btn-ghost{background:transparent;color:var(--sub);border:1px solid var(--border2)}.btn-ghost:hover{color:var(--text);border-color:var(--border3);background:var(--bg4)}.btn-ink{background:var(--bg4);color:var(--text);border:1px solid var(--border2)}.btn-ink:hover{background:var(--bg3)}.btn-sm{padding:6px 14px;font-size:11px;border-radius:8px}
+.stuck-banner{border-radius:14px;padding:22px 26px;margin-bottom:20px;border:1px solid rgba(245,166,35,.2);border-left:3px solid var(--amber);background:linear-gradient(135deg,rgba(245,166,35,.06),transparent)}.stuck-banner h4{font-size:14px;font-weight:700;color:var(--amber);margin-bottom:8px}.stuck-banner p{font-size:13px;color:var(--sub);margin-bottom:12px;line-height:1.7;font-weight:400}
+.reset-banner{border-radius:14px;padding:22px 26px;margin-bottom:20px;border:1px solid rgba(31,217,138,.2);border-left:3px solid var(--green);background:linear-gradient(135deg,rgba(31,217,138,.06),transparent)}.reset-banner h4{font-size:14px;font-weight:700;color:var(--green);margin-bottom:8px}.reset-banner p{font-size:13px;color:var(--sub);margin-bottom:12px;line-height:1.7;font-weight:400}
+.meta-row{display:flex;gap:22px;margin-bottom:16px;flex-wrap:wrap}.meta-item{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace}.meta-item span{color:var(--text);font-weight:600;margin-left:6px}
+.upload-zone{border:1.5px dashed var(--border2);border-radius:12px;padding:28px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;background:var(--bg3);position:relative}.upload-zone:hover,.upload-zone.drag{border-color:var(--blue);background:var(--blueg)}.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.uz-icon{font-size:28px;margin-bottom:8px}.uz-text{font-size:13px;color:var(--sub);font-weight:500}.uz-text strong{color:var(--blue2)}.uz-hint{font-size:11px;color:var(--muted);margin-top:4px;font-family:'JetBrains Mono',monospace}
+.file-preview{display:flex;align-items:center;gap:12px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:12px 16px;margin-top:12px}
+.fp-thumb{width:44px;height:44px;border-radius:8px;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;overflow:hidden}.fp-thumb img{width:100%;height:100%;object-fit:cover}
+.fp-name{font-size:13px;color:var(--text);font-weight:600}.fp-size{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:2px}.fp-remove{margin-left:auto;cursor:pointer;color:var(--red);font-size:18px;background:none;border:none;padding:0;opacity:.7;transition:opacity .15s}.fp-remove:hover{opacity:1}
+.proof-thumb{width:36px;height:36px;border-radius:6px;object-fit:cover;border:1px solid var(--border2);cursor:pointer;vertical-align:middle;transition:transform .15s}.proof-thumb:hover{transform:scale(1.1)}
+.proof-pdf{display:inline-flex;align-items:center;gap:5px;background:var(--redg);color:var(--red);border:1px solid rgba(255,77,106,.2);padding:4px 10px;border-radius:8px;font-size:11px;font-weight:600;margin-right:6px;font-family:'JetBrains Mono',monospace}
+.confirm-actions{display:flex;gap:8px;flex-wrap:wrap}.endorse-btn{background:var(--purpleg);border:1px solid rgba(155,109,255,.2);color:var(--purple);padding:5px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;letter-spacing:.2px}.endorse-btn:hover{background:rgba(155,109,255,.15)}
+.notif-wrap{position:relative}.notif-bell{width:36px;height:36px;border-radius:9px;border:1px solid var(--border);background:transparent;display:grid;place-items:center;cursor:pointer;font-size:17px;transition:all .15s;position:relative;color:var(--sub)}.notif-bell:hover{border-color:var(--border2);background:var(--bg3);color:var(--text)}
+.notif-badge{position:absolute;top:-5px;right:-5px;width:18px;height:18px;border-radius:50%;background:var(--red);color:#fff;font-size:10px;font-weight:700;display:none;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;border:2px solid var(--bg)}.notif-badge.show{display:flex}
+.notif-dropdown{display:none;position:absolute;top:calc(100% + 10px);right:0;width:340px;background:var(--bg2);border:1px solid var(--border2);border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.5);z-index:200;overflow:hidden;animation:fadeUp .2s ease both}.notif-dropdown.open{display:block}
+.nd-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border);background:var(--bg3)}.nd-title{font-size:12px;font-weight:700;font-family:'JetBrains Mono',monospace;letter-spacing:.5px;color:var(--sub);text-transform:uppercase}.nd-actions{display:flex;gap:8px}.nd-action-btn{font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:inherit;padding:3px 8px;border-radius:6px;transition:all .12s}.nd-action-btn:hover{color:var(--text);background:var(--bg4)}
+.nd-list{max-height:360px;overflow-y:auto}.nd-list::-webkit-scrollbar{width:3px}.nd-list::-webkit-scrollbar-thumb{background:var(--muted);border-radius:2px}.nd-empty{padding:32px;text-align:center;color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace}
+.nd-item{display:flex;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;text-decoration:none;color:inherit}.nd-item:last-child{border-bottom:none}.nd-item:hover{background:var(--bg3)}.nd-item.unread{background:rgba(77,124,254,.04)}
+.nd-unread-dot{width:3px;align-self:stretch;background:var(--blue);border-radius:2px;flex-shrink:0;margin-right:-4px}
+.nd-icon{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;font-size:16px;flex-shrink:0}.nd-icon.match{background:var(--blueg2)}.nd-icon.credit{background:var(--greeng)}.nd-icon.verified{background:rgba(255,209,102,.08)}.nd-icon.system{background:var(--bg4)}
+.nd-body{flex:1;min-width:0}.nd-item-title{font-size:13px;font-weight:600;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.nd-item-body{font-size:11px;color:var(--sub);line-height:1.5}.nd-item-time{font-size:10px;color:var(--muted);margin-top:3px;font-family:'JetBrains Mono',monospace}
+.credit-log-item{display:flex;align-items:center;gap:14px;padding:14px 22px;border-bottom:1px solid rgba(255,255,255,.025);transition:background .1s}.credit-log-item:last-child{border-bottom:none}.credit-log-item:hover{background:rgba(77,124,254,.03)}
+.cl-arrow{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-size:16px;flex-shrink:0;font-weight:700;font-family:'JetBrains Mono',monospace}
+.cl-arrow.in{background:var(--greeng);color:var(--green)}.cl-arrow.out{background:var(--redg);color:var(--red)}.cl-arrow.hold{background:var(--amberg);color:var(--amber)}.cl-arrow.refund{background:var(--blueg);color:var(--blue2)}
+.cl-reason{flex:1;font-size:13px;color:var(--sub)}.cl-time{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:2px}
+.cl-amount{font-size:15px;font-weight:700;font-family:'JetBrains Mono',monospace}.cl-amount.in{color:var(--green)}.cl-amount.out{color:var(--red)}.cl-amount.hold{color:var(--amber)}.cl-amount.refund{color:var(--blue2)}.cl-balance{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:2px}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(5,6,10,.85);backdrop-filter:blur(8px);z-index:100;align-items:center;justify-content:center}.modal-bg.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:20px;padding:40px;width:460px;box-shadow:0 0 0 1px rgba(77,124,254,.08),0 40px 80px rgba(0,0,0,.7);max-height:90vh;overflow-y:auto;animation:fadeUp .3s ease both;position:relative}
+.modal::before{content:'';position:absolute;top:0;left:20%;right:20%;height:1px;background:linear-gradient(90deg,transparent,var(--blue),transparent);opacity:.4}
+.modal h3{font-size:20px;font-weight:800;margin-bottom:6px;letter-spacing:-.3px}.modal>p{font-size:13px;color:var(--sub);margin-bottom:22px;line-height:1.7;font-weight:400}
+.test-q{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:12px;transition:border-color .15s}.test-q:hover{border-color:var(--border2)}.test-q .q-text{font-size:14px;font-weight:600;margin-bottom:14px}
+.test-opt{display:flex;gap:10px;align-items:center;margin-bottom:10px}.test-opt input{accent-color:var(--blue);width:14px;height:14px}.test-opt label{font-size:13px;color:var(--sub);cursor:pointer;transition:color .15s;font-weight:500}.test-opt:hover label{color:var(--text)}
+.modal-footer{display:flex;gap:10px;margin-top:24px}.stars{display:flex;gap:6px}.star{font-size:26px;color:var(--muted);cursor:pointer;transition:color .1s,transform .1s}
+.cstar{font-size:26px;color:var(--muted);cursor:pointer;transition:color .1s,transform .1s}
+.cstar:hover,.cstar.on{color:var(--gold);transform:scale(1.1)}.star:hover,.star.on{color:var(--gold);transform:scale(1.1)}
+#match-result{display:none;background:var(--greeng);border:1px solid rgba(31,217,138,.2);border-left:3px solid var(--green);border-radius:10px;padding:12px 18px;font-size:13px;color:var(--green);font-weight:600;margin-bottom:20px;font-family:'JetBrains Mono',monospace}
+#match-result.show{display:block;animation:fadeUp .3s ease both}
+</style>
+</head>
+<body>
+
+{% if not logged_in %}
+
+{% if page == 'register' %}
+<div class="register-page">
+  <div class="register-left">
+    <div class="rl-content">
+      <a href="/" style="display:flex;align-items:center;gap:9px;margin-bottom:48px;text-decoration:none">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,var(--blue),var(--purple));border-radius:9px;display:grid;place-items:center;font-size:14px">⚡</div>
+        <span style="font-size:15px;font-weight:800;color:var(--text)">X-Lurn</span>
+      </a>
+      <div class="rl-badge"><span class="hero-badge-dot"></span> Free to join</div>
+      <div class="rl-title">Start exchanging<br><span>skills today</span></div>
+      <div class="rl-desc">Join thousands of people teaching and learning from each other — using time credits instead of money.</div>
+      <div class="rl-perks">
+        <div class="rl-perk"><div class="rl-perk-icon" style="background:var(--blueg2)">🎯</div><span>Get matched with verified providers for your skill</span></div>
+        <div class="rl-perk"><div class="rl-perk-icon" style="background:var(--greeng)">🔒</div><span>Credits locked in escrow — only released on completion</span></div>
+        <div class="rl-perk"><div class="rl-perk-icon" style="background:var(--purpleg)">⭐</div><span>Build a verified reputation through tests and endorsements</span></div>
+        <div class="rl-perk"><div class="rl-perk-icon" style="background:var(--amberg)">💰</div><span>Start with 10 free credits — no payment needed</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="register-right">
+    <div class="register-form-wrap">
+      <div class="reg-nav">
+        <div class="reg-nav-logo"><div class="reg-nav-logo-icon">⚡</div><div class="reg-nav-logo-name">X-Lurn</div></div>
+        <div class="reg-nav-signin">Have an account? <a href="/">Sign in</a></div>
+      </div>
+      <div class="reg-title">Create your account</div>
+      <div class="reg-sub">Takes less than 2 minutes</div>
+      {% if error %}<div class="msg-err">{{ error }}</div>{% endif %}
+      {% if success %}<div class="msg-ok">{{ success }}</div>{% endif %}
+      <form method="POST" action="/register">
+        <div class="field"><label>Full Name</label><input type="text" name="name" required placeholder="Jane Smith"></div>
+        <div class="field"><label>Username</label><input type="text" name="username" required placeholder="janesmith"><div class="field-hint">Your public @handle on the platform</div></div>
+        <div class="field"><label>Password</label><input type="password" name="password" required placeholder="Min. 4 characters"></div>
+        <div class="field"><label>Skills you can offer <span style="color:var(--muted);font-size:9px">(comma separated)</span></label><input type="text" name="skills" placeholder="Python, Yoga, Guitar, Design…"></div>
+        <div class="proof-section"><p>Portfolio URL — shown on your profile</p><div class="field" style="margin-bottom:0"><label>Portfolio / Website</label><input type="url" name="portfolio" placeholder="https://yoursite.com"></div></div>
+        <button class="auth-btn" type="submit">Create account — it's free →</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% else %}
+<nav class="nav">
+  <div class="nav-logo"><div class="nav-logo-icon">⚡</div><div class="nav-logo-name">X-Lurn</div></div>
+  <div class="nav-links"><a href="#how">How it works</a><a href="#trust">Why trust us</a><a href="#skills">Skills</a></div>
+  <div class="nav-cta">
+    <button class="btn-nav-ghost" onclick="document.getElementById('login-modal').style.display='flex'">Sign in</button>
+    <button class="btn-nav-solid" onclick="location.href='/register'">Get started free</button>
+  </div>
+</nav>
+<section class="hero">
+  <div class="hero-bg"><div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div></div>
+  <div class="hero-content">
+    <div class="hero-badge"><span class="hero-badge-dot"></span> Time banking — no money involved</div>
+    <h1 class="hero-title">Exchange skills.<br><span>Earn time credits.</span><br>Build community.</h1>
+    <p class="hero-sub">Teach what you know, learn what you need. Every hour of your time equals one credit — spend it on any skill you want to learn.</p>
+    <div class="hero-ctas">
+      <button class="btn-hero-primary" onclick="location.href='/register'">Start exchanging for free →</button>
+      <button class="btn-hero-ghost" onclick="document.getElementById('login-modal').style.display='flex'">Sign in to your account</button>
+    </div>
+    <div class="hero-stats">
+      <div><div class="hero-stat-num blue">100%</div><div class="hero-stat-lbl">Credit based</div></div>
+      <div><div class="hero-stat-num green">Verified</div><div class="hero-stat-lbl">Providers only</div></div>
+      <div><div class="hero-stat-num purple">Escrow</div><div class="hero-stat-lbl">Credit protection</div></div>
+    </div>
+  </div>
+</section>
+<div class="ticker-wrap"><div class="ticker">{% for item in [("Python","⭐ Verified"),("Guitar","⭐ Verified"),("Graphic Design","Trusted"),("Yoga","⭐ Verified"),("JavaScript","⭐ Verified"),("Photography","Trusted"),("Tamil Language","⭐ Verified"),("Video Editing","Beginner"),("Machine Learning","⭐ Verified"),("Cooking","Trusted"),("Chess","⭐ Verified"),("Public Speaking","Trusted"),("Python","⭐ Verified"),("Guitar","⭐ Verified"),("Graphic Design","Trusted"),("Yoga","⭐ Verified"),("JavaScript","⭐ Verified"),("Photography","Trusted")] %}<div class="ticker-item"><span>{{ item[0] }}</span><span class="ticker-dot"></span>{{ item[1] }}</div>{% endfor %}</div></div>
+<section class="section" id="how">
+  <div class="section-label">How it works</div>
+  <h2 class="section-title">Three steps to start<br>exchanging skills</h2>
+  <p class="section-sub">No payments, no subscriptions. Just your time and skills.</p>
+  <div class="steps">
+    <div class="step"><div class="step-num">01 — Register</div><div class="step-icon">🙋</div><div class="step-title">Create your profile</div><div class="step-desc">Sign up and list the skills you can teach. You start with 10 free time credits. Upload proof or take a skill test to get ⭐ Verified status and rank higher in matches.</div></div>
+    <div class="step"><div class="step-num">02 — Request</div><div class="step-icon">🔎</div><div class="step-title">Request a skill</div><div class="step-desc">Need to learn something? Submit a request. Our priority-queue matching algorithm pairs you with the most legitimate available provider — verified skills get matched first.</div></div>
+    <div class="step"><div class="step-num">03 — Confirm</div><div class="step-icon">✅</div><div class="step-title">Complete and confirm</div><div class="step-desc">Your credits are locked in escrow at match time. After the session, both parties confirm completion — credits release to the provider. Dispute? Credits are refunded instantly.</div></div>
+  </div>
+</section>
+<section class="trust-section" id="trust"><div class="trust-inner">
+  <div>
+    <div class="section-label">Why trust us</div>
+    <h2 class="section-title">Built-in legitimacy,<br>not an afterthought</h2>
+    <p class="section-sub">Every provider goes through a multi-layer verification system before being matched with you.</p>
+    <div class="trust-features">
+      <div class="trust-feature"><div class="tf-icon" style="background:var(--blueg2)">🧪</div><div><div class="tf-title">Skill tests</div><div class="tf-desc">Score ≥70% to get ⭐ Verified automatically. Objective, immediate, no admin review needed.</div></div></div>
+      <div class="trust-feature"><div class="tf-icon" style="background:var(--greeng)">👍</div><div><div class="tf-title">Community endorsements</div><div class="tf-desc">After each session, requesters can endorse the provider's skill. 10 endorsements = ⭐ Verified.</div></div></div>
+      <div class="trust-feature"><div class="tf-icon" style="background:var(--amberg)">📋</div><div><div class="tf-title">Admin proof review</div><div class="tf-desc">Upload a certificate or screenshot. Admin reviews and approves — no fake links accepted.</div></div></div>
+      <div class="trust-feature"><div class="tf-icon" style="background:var(--purpleg)">⚖️</div><div><div class="tf-title">Beginner cap</div><div class="tf-desc">New providers handle max 3 sessions. Only those with avg rating ≥3.0 graduate to Trusted status.</div></div></div>
+    </div>
+  </div>
+  <div>
+    <div class="score-card">
+      <div class="sc-title">Provider legitimacy card</div>
+      <div class="sc-user"><div class="sc-avatar">A</div><div><div class="sc-name">Alice Kumar</div><div class="sc-handle">@alice · ✓ Trusted Provider</div></div></div>
+      <div class="sc-score-row"><div class="sc-score-lbl">Legitimacy Score</div><div class="sc-score-val">79<span style="font-size:14px;color:var(--muted)">/110</span></div></div>
+      <div class="sc-bar-track"><div class="sc-bar-fill"></div></div>
+      <div class="sc-chips"><span class="sc-chip verified">⭐ Python Verified</span><span class="sc-chip green">12 sessions done</span><span class="sc-chip blue">★ 4.7 avg rating</span><span class="sc-chip verified">⭐ Design Verified</span><span class="sc-chip blue">8 endorsements</span></div>
+    </div>
+  </div>
+</div></section>
+<section class="skills-section" id="skills">
+  <div class="skills-title">Skills being exchanged right now</div>
+  <div class="marquee-row"><div class="marquee-inner">{% for s in ["Python","Machine Learning","Guitar","Yoga","Graphic Design","Tamil","Video Editing","Chess","Public Speaking","Cooking","JavaScript","Figma","Photography","Carnatic Music","Data Analysis","Python","Machine Learning","Guitar","Yoga","Graphic Design","Tamil","Video Editing","Chess"] %}<span class="skill-pill">{{ s }}</span>{% endfor %}</div></div>
+  <div class="marquee-row" style="margin-top:12px"><div class="marquee-inner">{% for s in ["Sketch","3D Modelling","Origami","Tabla","French Language","Excel","React","Pottery","Swimming","Drawing","Meditation","Arduino","Badminton","Sketch","3D Modelling","Origami","Tabla","French Language","Excel","React","Pottery","Swimming"] %}<span class="skill-pill">{{ s }}</span>{% endfor %}</div></div>
+</section>
+<section class="cta-section">
+  <h2 class="cta-title">Ready to start?<br>Your first 10 credits are free.</h2>
+  <p class="cta-sub">Join the platform and start learning from verified community members today.</p>
+  <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;position:relative;z-index:1">
+    <button class="btn-hero-primary" onclick="location.href='/register'">Create free account →</button>
+    <button class="btn-hero-ghost" onclick="document.getElementById('login-modal').style.display='flex'">Sign in instead</button>
+  </div>
+</section>
+<footer class="footer">
+  <div class="footer-logo"><div style="width:28px;height:28px;background:linear-gradient(135deg,var(--blue),var(--purple));border-radius:8px;display:grid;place-items:center;font-size:13px">⚡</div>X-Lurn</div>
+  <div style="font-family:'JetBrains Mono',monospace;font-size:11px">Time banking platform — exchange skills, not money</div>
+  <div style="display:flex;gap:20px;font-size:12px"><a href="/" style="color:var(--muted);transition:color .15s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">Sign in</a><a href="/register" style="color:var(--muted);transition:color .15s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">Register</a></div>
+</footer>
+<div class="modal-bg" id="login-modal" {% if page == 'login' and error %}style="display:flex"{% endif %}>
+  <div class="modal" style="width:400px">
+    <h3>Welcome back</h3><p>Sign in to your X-Lurn account</p>
+    {% if error %}<div class="msg-err">{{ error }}</div>{% endif %}
+    <form method="POST" action="/">
+      <div class="form-group" style="margin-bottom:16px"><label>Username</label><input type="text" name="username" required autofocus placeholder="Enter username"></div>
+      <div class="form-group" style="margin-bottom:20px"><label>Password</label><input type="password" name="password" required placeholder="Enter password"></div>
+      <div class="modal-footer" style="margin-top:0"><button type="submit" class="btn btn-blue" style="flex:1;padding:12px">Sign in →</button><button type="button" class="btn btn-ghost" onclick="document.getElementById('login-modal').style.display='none'">Cancel</button></div>
+    </form>
+    <div class="auth-switch" style="margin-top:16px">No account? <a href="/register">Register free</a></div>
+  </div>
+</div>
+<script>
+document.querySelector('.btn-nav-ghost').addEventListener('click',()=>{ document.getElementById('login-modal').style.display='flex'; });
+document.getElementById('login-modal').addEventListener('click',function(e){ if(e.target===this)this.style.display='none'; });
+document.querySelectorAll('a[href^="#"]').forEach(a=>{ a.addEventListener('click',e=>{ e.preventDefault(); document.querySelector(a.getAttribute('href'))?.scrollIntoView({behavior:'smooth'}); }); });
+</script>
+{% endif %}
+
+{% else %}
+<!-- ═══════════════════════════════════════
+     APP (post-login)
+═══════════════════════════════════════ -->
+<div class="topbar">
+  <div class="t-logo">
+    <div class="t-logo-icon">⚡</div>
+    <div class="t-logo-name">X-Lurn</div>
+  </div>
+  <div class="topbar-right">
+    {% if user.role != 'admin' %}
+    <div class="chip chip-gray">{{ user.credits }} cr</div>
+    <div class="chip {% if user.provider_status == 'Trusted' %}chip-green{% elif user.provider_status == 'Stuck' %}chip-amber{% else %}chip-blue{% endif %}">
+      {% if user.provider_status == 'Trusted' %}✓ Trusted
+      {% elif user.provider_status == 'Stuck' %}⚠ Stuck
+      {% else %}◈ Beginner · {{ user.completed_services }}/3{% endif %}
+    </div>
+    {% endif %}
+    <div class="chip chip-ink">{{ user.name }}</div>
+    {% if user.role != 'admin' %}
+    <div class="notif-wrap">
+      <button class="notif-bell" onclick="toggleNotifDropdown()" id="notif-bell">🔔</button>
+      <div class="notif-badge {% if unread_notifs %}show{% endif %}" id="notif-badge">{{ unread_notifs if unread_notifs else '' }}</div>
+      <div class="notif-dropdown" id="notif-dropdown">
+        <div class="nd-head">
+          <div class="nd-title">Notifications</div>
+          <div class="nd-actions">
+            <button class="nd-action-btn" onclick="markAllRead()">Mark all read</button>
+            <button class="nd-action-btn" onclick="clearAll()">Clear</button>
+          </div>
+        </div>
+        <div class="nd-list" id="nd-list"><div class="nd-empty">Loading…</div></div>
+      </div>
+    </div>
+    {% endif %}
+    <a href="/logout" class="sign-out">↩ out</a>
+  </div>
+</div>
+
+<div class="tab-bar">
+  {% if user.role == 'admin' %}
+  <div class="tab active" onclick="switchTab('overview')">Overview</div>
+  <div class="tab" onclick="switchTab('users')">Users</div>
+  <div class="tab" onclick="switchTab('queue')">Queue</div>
+  <div class="tab" onclick="switchTab('requests-admin')">Requests</div>
+  <div class="tab" onclick="switchTab('connections-admin')">Connections</div>
+  <div class="tab" onclick="switchTab('review-proofs')">Review Proofs{% if pending_proofs %}<span class="tab-badge">{{ pending_proofs|length }}</span>{% endif %}</div>
+  {% else %}
+  <div class="tab active" onclick="switchTab('profile')">Profile</div>
+  <div class="tab" onclick="switchTab('skills')">Skills</div>
+  <div class="tab" onclick="switchTab('request')">Request</div>
+  <div class="tab" onclick="switchTab('activity')">Activity</div>
+  <div class="tab" onclick="switchTab('connections')">Connections</div>
+  <div class="tab" onclick="switchTab('credits')">Credits</div>
+  {% endif %}
+</div>
+
+{% if user.role == 'admin' %}
+
+<div class="page active" id="page-overview">
+  <div class="stats">
+    <div class="stat s-green fade-up"> <div class="stat-lbl">Users</div>      <div class="stat-num">{{ users_count }}</div></div>
+    <div class="stat s-amber fade-up"> <div class="stat-lbl">Pending</div>    <div class="stat-num">{{ pending_count }}</div></div>
+    <div class="stat s-gold fade-up">  <div class="stat-lbl">Completed</div>  <div class="stat-num">{{ completed_count }}</div></div>
+    <div class="stat s-blue fade-up">  <div class="stat-lbl">Connections</div><div class="stat-num">{{ connections_count }}</div></div>
+  </div>
+  <button class="btn btn-green" onclick="runMatching()" style="margin-bottom:16px">⟳ &nbsp;Run Matching Engine</button>
+  <div id="match-result"></div>
+  <div class="sec-title">Recent Connections</div>
+  <div class="card accent-green">
+    <table><thead><tr><th>Requester</th><th>Provider</th><th>Skill</th><th>Status</th></tr></thead><tbody>
+    {% for c in conn_details[:5] %}<tr><td style="color:var(--green);font-weight:600">{{ c.requester }}</td><td style="color:var(--green);font-weight:600">{{ c.provider }}</td><td class="td-name">{{ c.skill }}</td><td><span class="badge b-{{ c.status.lower() }}">{{ c.status }}</span></td></tr>
+    {% else %}<tr class="empty-row"><td colspan="4">— no connections yet —</td></tr>{% endfor %}
+    </tbody></table>
+  </div>
+</div>
+
+<div class="page" id="page-users">
+  <div class="card accent-green">
+    <div class="card-head">All Users <span class="card-badge">{{ users_count }}</span></div>
+    <table><thead><tr><th>ID</th><th>Name</th><th>Status</th><th>Score</th><th>Skills</th><th>Credits</th><th>Rating</th></tr></thead><tbody>
+    {% for u in all_users %}<tr>
+      <td class="td-mono">{{ u.id }}</td><td class="td-name">{{ u.name }}</td>
+      <td><span class="badge b-{{ u.provider_status.lower() }}">{{ u.provider_status }}</span></td>
+      <td style="color:var(--green);font-family:'Geist Mono',monospace;font-weight:700">{{ u.legitimacy_score }}</td>
+      <td>{% for sk in u.skills %}{% set sd = u.skill_data.get(sk, {}) %}<span class="badge {% if sd.get('verified') %}b-verified{% else %}b-assigned{% endif %}" style="margin-right:3px">{% if sd.get('verified') %}⭐{% endif %} {{ sk }}</span>{% else %}—{% endfor %}</td>
+      <td style="color:var(--green);font-family:'Geist Mono',monospace;font-weight:600">{{ u.credits }}</td>
+      <td style="color:var(--gold)">{{ u.avg_rating if u.avg_rating else '—' }}</td>
+    </tr>{% else %}<tr class="empty-row"><td colspan="7">— no users yet —</td></tr>{% endfor %}
+    </tbody></table>
+  </div>
+</div>
+
+<div class="page" id="page-queue">
+  <div class="card">
+    <div class="card-head">Priority Queue <span class="card-badge">{{ pq_items|length }}</span></div>
+    <table><thead><tr><th>Request ID</th><th>Skill</th><th>Requester</th><th>Priority Score</th></tr></thead><tbody>
+    {% for i in pq_items %}<tr><td class="td-mono">{{ i.id }}</td><td style="color:var(--amber);font-weight:600">{{ i.skill }}</td><td>{{ i.requester }}</td><td style="color:var(--green);font-family:'Geist Mono',monospace;font-weight:700">{{ i.priority }}</td></tr>
+    {% else %}<tr class="empty-row"><td colspan="4">— queue is empty —</td></tr>{% endfor %}
+    </tbody></table>
+  </div>
+</div>
+
+<div class="page" id="page-requests-admin">
+  <div class="card accent-amber">
+    <div class="card-head">All Requests <span class="card-badge">{{ req_details|length }}</span></div>
+    <table><thead><tr><th>ID</th><th>Skill</th><th>Requester</th><th>Provider</th><th>Status</th><th>Escrow</th></tr></thead><tbody>
+    {% for r in req_details %}<tr>
+      <td class="td-mono">{{ r.id }}</td><td style="color:var(--amber);font-weight:600">{{ r.skill }}</td>
+      <td>{{ r.requester }}</td><td>{{ r.provider }}</td>
+      <td><span class="badge b-{{ r.status.lower() }}">{{ r.status }}</span></td>
+      <td>{% if r.escrow != 'none' %}<span class="badge b-{{ r.escrow }}">🔒 {{ r.escrow }} · {{ r.credits }}cr</span>{% else %}<span style="color:var(--text4)">—</span>{% endif %}</td>
+    </tr>{% else %}<tr class="empty-row"><td colspan="6">— no requests —</td></tr>{% endfor %}
+    </tbody></table>
+  </div>
+</div>
+
+<div class="page" id="page-connections-admin">
+  <div class="card accent-green">
+    <div class="card-head">All Connections <span class="card-badge">{{ connections_count }}</span></div>
+    <table><thead><tr><th>Requester</th><th>Provider</th><th>Skill</th><th>Status</th></tr></thead><tbody>
+    {% for c in conn_details %}<tr>
+      <td style="color:var(--green);font-weight:600">{{ c.requester }}</td>
+      <td style="color:var(--green);font-weight:600">{{ c.provider }}</td>
+      <td class="td-name">{{ c.skill }}</td>
+      <td><span class="badge b-{{ c.status.lower() }}">{{ c.status }}</span></td>
+    </tr>{% else %}<tr class="empty-row"><td colspan="4">— no connections —</td></tr>{% endfor %}
+    </tbody></table>
+  </div>
+</div>
+
+<div class="page" id="page-review-proofs">
+  <div class="card accent-gold">
+    <div class="card-head">Pending Proof Reviews <span class="card-badge">{{ pending_proofs|length }}</span></div>
+    {% if pending_proofs %}
+    <table><thead><tr><th>User</th><th>Skill</th><th>File</th><th>Preview</th><th>Action</th></tr></thead><tbody>
+    {% for p in pending_proofs %}
+    <tr id="proof-row-{{ p.uid }}-{{ p.skill }}-{{ p.index }}">
+      <td class="td-name">{{ p.name }} <span class="td-mono" style="color:var(--text4);font-size:11px">@{{ p.uid }}</span></td>
+      <td style="color:var(--amber);font-weight:600">{{ p.skill }}</td>
+      <td class="td-mono">{{ p.filename }}</td>
+      <td>
+        {% if 'image' in p.mime %}<a href="/proof-file/{{ p.uid }}/{{ p.skill }}/{{ p.index }}" target="_blank"><img src="/proof-file/{{ p.uid }}/{{ p.skill }}/{{ p.index }}" style="width:48px;height:48px;border-radius:8px;object-fit:cover;border:1px solid var(--border2);cursor:pointer;transition:transform .15s" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'"></a>
+        {% else %}<a href="/proof-file/{{ p.uid }}/{{ p.skill }}/{{ p.index }}" target="_blank" class="proof-pdf">📄 View PDF</a>{% endif %}
+      </td>
+      <td><div style="display:flex;gap:8px"><button class="btn btn-green btn-sm" onclick="reviewProof('{{ p.uid }}','{{ p.skill }}',{{ p.index }},'approve',this)">✓ Approve</button><button class="btn btn-red btn-sm" onclick="reviewProof('{{ p.uid }}','{{ p.skill }}',{{ p.index }},'reject',this)">✗ Reject</button></div></td>
+    </tr>{% endfor %}
+    </tbody></table>
+    {% else %}
+    <div style="padding:48px;text-align:center;color:var(--text4);font-size:12px;font-family:'Geist Mono',monospace">✓ no pending proofs — all caught up</div>
+    {% endif %}
+  </div>
+</div>
+
+{% else %}
+
+<div class="page active" id="page-profile">
+  {% if user.provider_status == 'Stuck' %}
+    {% if reset_eligible %}
+    <div class="reset-banner"><h4>🎉 Second Chance Available</h4><p>You've waited 30 days. Reset your trial and get 3 fresh sessions with a clean slate.</p><div class="meta-row"><div class="meta-item">Resets used:<span>{{ user.reset_count }}/2</span></div><div class="meta-item">Remaining:<span>{{ resets_left }}</span></div></div><button class="btn btn-green" onclick="requestReset(this)">↺ Reset My Trial</button><span class="fb" id="reset-fb" style="margin-left:12px"></span></div>
+    {% else %}
+    <div class="stuck-banner"><h4>⚠ Provider Trial Ended</h4>{% if resets_left > 0 %}<p>Your 3 trial sessions ended with a rating below 3.0. You'll get another chance after the cooldown.</p><div class="meta-row"><div class="meta-item">Resets left:<span>{{ resets_left }}/2</span></div><div class="meta-item">Available in:<span>{{ days_until_reset }} days</span></div></div>{% else %}<p>Both resets used. You can no longer provide services but receive +2 free credits every 7 days to keep learning.</p>{% endif %}</div>
+    {% endif %}
+  {% endif %}
+
+  <div class="profile-header fade-up">
+    <div class="avatar">{{ user.name[0].upper() }}</div>
+    <div>
+      <div class="profile-name">{{ user.name }}</div>
+      <div class="profile-meta">
+        <span class="badge {% if user.provider_status == 'Trusted' %}b-trusted{% elif user.provider_status == 'Stuck' %}b-stuck{% else %}b-beginner{% endif %}">{% if user.provider_status == 'Trusted' %}✓ Trusted{% elif user.provider_status == 'Stuck' %}⚠ Stuck{% else %}◈ Beginner{% endif %}</span>
+        <span class="td-mono" style="font-size:11px;color:var(--text4)">@{{ user.id }}</span>
+        {% if user.avg_rating %}<span style="color:var(--gold);font-size:13px;font-weight:600">★ {{ user.avg_rating }}</span>{% endif %}
+      </div>
+    </div>
+    <div class="profile-stats">
+      <div class="ps-item"><div class="ps-val" style="color:var(--green)">{{ user.credits }}</div><div class="ps-lbl">Credits</div></div>
+      <div class="ps-item"><div class="ps-val">{{ user.completed_services }}</div><div class="ps-lbl">Sessions</div></div>
+      <div class="ps-item"><div class="ps-val" style="color:var(--gold)">{{ legitimacy_score }}</div><div class="ps-lbl">Score</div></div>
+    </div>
+  </div>
+
+  <div class="legit-bar-wrap fade-up">
+    <div class="legit-head">
+      <div><div class="legit-title">Legitimacy Score</div><div class="legit-detail">Verified skills · Rating · Experience · Endorsements</div></div>
+      <div class="legit-score">{{ legitimacy_score }}<span>/110</span></div>
+    </div>
+    <div class="legit-track"><div class="legit-fill" style="width:{{ [((legitimacy_score / 110) * 100)|int, 100]|min }}%"></div></div>
+    <div class="legit-labels"><span>Unverified</span><span>Trusted</span><span>Expert</span></div>
+  </div>
+
+  <div class="sec-title">My Skills</div>
+  <div class="skill-chips">
+    {% for s in skill_display %}<span class="skill-chip {% if s.verified %}verified{% endif %}">{% if s.verified %}⭐{% endif %} {{ s.name }}{% if s.endorsements %}<span style="font-size:10px;opacity:.6;font-family:'Geist Mono',monospace">{{ s.endorsements|length }}✓</span>{% endif %}</span>
+    {% else %}<span style="color:var(--text4);font-size:13px;font-family:'Geist Mono',monospace">— go to Skills tab to add skills —</span>{% endfor %}
+  </div>
+
+  {% if my_reviews %}
+  <div class="sec-title" style="margin-top:28px">Reviews Received <span style="color:var(--blue2);margin-left:6px;font-family:'JetBrains Mono',monospace">({{ my_reviews|length }})</span></div>
+  {% for r in my_reviews %}
+  <div class="review-card">
+    <div class="review-stars">{{ '★' * r.rating }}{{ '☆' * (5 - r.rating) }}</div>
+    {% if r.text %}<div class="review-text">{{ r.text }}</div>{% endif %}
+    <div class="review-meta">
+      <span class="review-skill-tag">{{ r.skill }}</span>
+      <span>·</span>
+      <span>{{ r.reviewer_name }}</span>
+      <span>·</span>
+      <span data-ts="{{ r.timestamp }}" class="rev-ts">{{ r.timestamp | int }}</span>
+    </div>
+  </div>
+  {% endfor %}
+  {% endif %}
+</div>
+
+<div class="page" id="page-skills">
+  <div class="form-card" style="border-top:3px solid var(--green)">
+    <div class="form-card-title">Update Skills</div>
+    <div class="form-card-sub">Add your skills. Upload proof to earn ⭐ Verified status — admin reviews and approves it.</div>
+    <div class="form-grid">
+      <div class="form-group" style="grid-column:1/-1"><label>Skills (comma separated)</label><input type="text" id="skills-inp" placeholder="Python, Yoga, Guitar" value="{{ user.skills|join(', ') }}"></div>
+      <div class="form-group" style="grid-column:1/-1"><label>Portfolio URL <span style="color:var(--text4);font-size:9px">(display only)</span></label><input type="url" id="portfolio-inp" placeholder="https://yoursite.com"></div>
+    </div>
+    <div class="skill-chips" id="skills-preview" style="margin-bottom:18px">{% for s in skill_display %}<span class="skill-chip {% if s.verified %}verified{% endif %}">{% if s.verified %}⭐{% endif %} {{ s.name }}</span>{% endfor %}</div>
+    <div class="form-footer"><button class="btn btn-green" id="save-skills-btn" onclick="saveSkills()">Save Skills</button><button class="btn btn-ghost btn-sm" onclick="openTestModal()">Take Skill Test</button><span class="fb" id="skills-fb"></span></div>
+  </div>
+
+  <div class="form-card" style="border-top:3px solid var(--gold)">
+    <div class="form-card-title">Upload Proof</div>
+    <div class="form-card-sub">Upload a certificate or screenshot. Admin reviews it — approval earns ⭐ Verified status.</div>
+    <div class="form-grid"><div class="form-group"><label>Skill this proves</label><input type="text" id="file-skill-inp" placeholder="e.g. Python"></div></div>
+    <div class="upload-zone" id="upload-zone">
+      <input type="file" id="proof-file-inp" accept=".png,.jpg,.jpeg,.gif,.webp,.pdf" onchange="onFileSelected(this)">
+      <div class="uz-icon">📎</div>
+      <div class="uz-text"><strong>Click to upload</strong> or drag and drop</div>
+      <div class="uz-hint">PNG · JPG · WEBP · GIF · PDF &nbsp;·&nbsp; max 5 MB</div>
+    </div>
+    <div id="file-preview-wrap" style="display:none"><div class="file-preview"><div class="fp-thumb" id="fp-thumb">📄</div><div><div class="fp-name" id="fp-name"></div><div class="fp-size" id="fp-size"></div></div><button class="fp-remove" onclick="clearFile()">✕</button></div></div>
+    <div class="form-footer" style="margin-top:14px"><button class="btn btn-ink btn-sm" onclick="uploadFile()">⬆ Upload</button><span class="fb" id="upload-fb"></span></div>
+  </div>
+
+  {% if skill_display %}
+  <div class="sec-title">Verification Status</div>
+  <div class="card accent-green">
+    <table><thead><tr><th>Skill</th><th>Verified</th><th>Test Score</th><th>Proofs</th><th>Endorsements</th><th>Bonus Cr.</th></tr></thead><tbody>
+    {% for s in skill_display %}<tr>
+      <td class="td-name">{{ s.name }}</td>
+      <td>{% if s.verified %}<span class="badge b-verified">⭐ Verified</span>{% else %}<span class="badge b-pending">Unverified</span>{% endif %}</td>
+      <td style="font-family:'Geist Mono',monospace;color:{% if s.test_score and s.test_score >= 70 %}var(--green){% else %}var(--text3){% endif %}">{{ s.test_score if s.test_score else '—' }}{% if s.test_score %}%{% endif %}</td>
+      <td>{% for p in s.proofs %}{% if p.type == 'file' %}<div style="display:inline-flex;align-items:center;gap:5px;margin-right:6px">{% if 'image' in p.mime %}<a href="/proof-file/{{ user.id }}/{{ s.name }}/{{ p.index }}" target="_blank"><img src="/proof-file/{{ user.id }}/{{ s.name }}/{{ p.index }}" class="proof-thumb" title="{{ p.filename }}"></a>{% else %}<a href="/proof-file/{{ user.id }}/{{ s.name }}/{{ p.index }}" target="_blank" class="proof-pdf">📄 {{ p.filename }}</a>{% endif %}{% if p.get('approved') is none %}<span class="badge b-pending" style="font-size:9px">Pending</span>{% elif p.get('approved') %}<span class="badge b-verified" style="font-size:9px">⭐ OK</span>{% else %}<span class="badge b-disputed" style="font-size:9px">Rejected</span>{% endif %}</div>{% endif %}{% else %}—{% endfor %}</td>
+      <td class="td-mono">{{ s.endorsements|length }}</td>
+      <td class="td-mono" style="color:var(--gold)">{{ s.bonus_credits }}</td>
+    </tr>{% endfor %}
+    </tbody></table>
+  </div>
+  {% endif %}
+</div>
+
+<div class="page" id="page-request">
+  <div class="form-card" style="border-top:3px solid var(--green)">
+    <div class="form-card-title">Request a Skill</div>
+    <div class="form-card-sub">Credits are locked in escrow at match time and only released after both parties confirm completion — or fully refunded if you dispute.</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Skill Needed</label><input type="text" id="req-skill" placeholder="e.g. Python, Guitar…"></div>
+      <div class="form-group"><label>Duration</label><select id="req-duration"><option value="">— Select —</option><option>30 minutes</option><option>1 hour</option><option>2 hours</option><option>Half day</option><option>Flexible</option></select></div>
+      <div class="form-group"><label>Priority</label><select id="req-priority"><option value="Normal">Normal</option><option value="Low">Low</option><option value="Urgent">Urgent</option><option value="Critical">Critical</option></select></div>
+      <div class="form-group"><label>Credit Cost</label><input type="number" id="req-cost" value="1" min="1" max="{{ user.credits }}"></div>
+    </div>
+    <div class="form-footer"><button class="btn btn-green" id="submit-btn" onclick="submitRequest()">Submit Request</button><span class="fb" id="req-fb"></span></div>
+  </div>
+</div>
+
+<div class="page" id="page-activity">
+  <div class="card accent-amber">
+    <div class="card-head">My Requests <span class="card-badge">{{ my_requests|length }}</span></div>
+    <table><thead><tr><th>ID</th><th>Skill</th><th>Provider</th><th>Status</th><th>Escrow</th><th>Actions</th></tr></thead>
+    <tbody id="req-table">
+    {% for r in my_requests %}<tr id="row-{{ r.id }}">
+      <td class="td-mono">{{ r.id }}</td><td class="td-name">{{ r.skill }}</td><td>{{ r.provider }}</td>
+      <td><span class="badge b-{{ r.status.lower() }}">{{ r.status }}</span></td>
+      <td>{% if r.escrow == 'held' %}<span class="badge b-held">🔒 Held</span>{% elif r.escrow == 'released' %}<span class="badge b-released">✓ Released</span>{% elif r.escrow == 'refunded' %}<span class="badge b-refunded">↩ Refunded</span>{% else %}<span style="color:var(--text4)">—</span>{% endif %}</td>
+      <td>{% if r.status == 'Assigned' and r.escrow == 'held' %}<div class="confirm-actions">{% if not r.req_confirmed %}<button class="btn btn-green btn-sm" onclick="openConfirmModal('{{ r.id }}')">✓ Confirm</button>{% else %}<span class="badge b-completed">Confirmed</span>{% endif %}<button class="btn btn-red btn-sm" onclick="disputeRequest('{{ r.id }}', this)">Dispute</button></div>{% elif r.status == 'Completed' %}<span class="badge b-completed">Done</span>{% endif %}</td>
+    </tr>{% else %}<tr class="empty-row"><td colspan="6">— no requests yet —</td></tr>{% endfor %}
+    </tbody></table>
+  </div>
+</div>
+
+<div class="page" id="page-connections">
+  <div class="card accent-green">
+    <div class="card-head">My Connections <span class="card-badge">{{ my_connections|length }}</span></div>
+    <table><thead><tr><th>With</th><th>Skill</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+    {% for c in my_connections %}<tr>
+      <td class="td-name">{{ c.other }}</td>
+      <td style="color:var(--green);font-weight:600">{{ c.skill }}</td>
+      <td><span class="badge b-{{ c.role }}">{{ c.role }}</span></td>
+      <td><span class="badge b-{{ c.status.lower() }}">{{ c.status }}</span></td>
+      <td>
+        {% if c.status == 'Active' or c.status == 'Completed' %}
+        <div class="confirm-actions">
+          <a href="/chat/{{ c.request_id }}" class="btn btn-ink btn-sm">💬 Chat</a>
+          {% if c.status == 'Active' %}
+            {% if c.role == 'provider' %}<button class="btn btn-green btn-sm" onclick="confirmDone('{{ c.request_id }}', this)">✓ Mark Done</button>{% endif %}
+            {% if c.role == 'requester' %}<button class="endorse-btn" onclick="openEndorse('{{ c.other }}', '{{ c.skill }}')">👍 Endorse</button>{% endif %}
+          {% elif c.role == 'requester' %}<button class="endorse-btn" onclick="openEndorse('{{ c.other }}', '{{ c.skill }}')">👍 Endorse</button>{% endif %}
+        </div>
+        {% endif %}
+      </td>
+    </tr>{% else %}<tr class="empty-row"><td colspan="5">— no connections yet —</td></tr>{% endfor %}
+    </tbody></table>
+  </div>
+</div>
+
+<div class="page" id="page-credits">
+  <div class="profile-header fade-up" style="margin-bottom:18px">
+    <div style="flex:1">
+      <div style="font-size:10px;font-weight:700;color:var(--text4);letter-spacing:1.5px;text-transform:uppercase;font-family:'Geist Mono',monospace;margin-bottom:8px">Current Balance</div>
+      <div style="font-family:'Instrument Serif',serif;font-size:56px;color:var(--green);letter-spacing:-2px;line-height:1">{{ user.credits }}</div>
+      <div style="font-size:13px;color:var(--text4);margin-top:4px">time credits</div>
+    </div>
+    <div style="display:flex;gap:28px">
+      <div class="ps-item"><div class="ps-val" id="total-in" style="color:var(--green)">—</div><div class="ps-lbl">Earned</div></div>
+      <div class="ps-item"><div class="ps-val" id="total-out" style="color:var(--red)">—</div><div class="ps-lbl">Spent</div></div>
+      <div class="ps-item"><div class="ps-val" id="total-hold" style="color:var(--amber)">—</div><div class="ps-lbl">Escrowed</div></div>
+    </div>
+  </div>
+  <div class="sec-title">Transaction History</div>
+  <div class="card accent-green">
+    <div class="card-head">Credit Log <span class="card-badge" id="credit-count">Loading…</span></div>
+    <div id="credit-log-list"><div style="padding:40px;text-align:center;color:var(--text4);font-size:12px;font-family:'Geist Mono',monospace">Loading transactions…</div></div>
+  </div>
+</div>
+
+{% endif %}
+
+<!-- MODALS -->
+<div class="modal-bg" id="test-modal">
+  <div class="modal">
+    <h3>Skill Test</h3>
+    <p>Score ≥70% earns bonus credits and ⭐ verified status immediately.</p>
+    <div class="form-group" style="margin-bottom:16px"><label>Skill to Test</label><input type="text" id="test-skill-inp" placeholder="e.g. Python"></div>
+    <div class="test-q"><div class="q-text">Q1. How do you define a function in Python?</div><div class="test-opt"><input type="radio" name="q1" id="q1a" value="1"><label for="q1a">def my_func():</label></div><div class="test-opt"><input type="radio" name="q1" id="q1b" value="0"><label for="q1b">function my_func():</label></div><div class="test-opt"><input type="radio" name="q1" id="q1c" value="0"><label for="q1c">func my_func():</label></div></div>
+    <div class="test-q"><div class="q-text">Q2. Which data structure uses LIFO order?</div><div class="test-opt"><input type="radio" name="q2" id="q2a" value="0"><label for="q2a">Queue</label></div><div class="test-opt"><input type="radio" name="q2" id="q2b" value="1"><label for="q2b">Stack</label></div><div class="test-opt"><input type="radio" name="q2" id="q2c" value="0"><label for="q2c">Heap</label></div></div>
+    <div class="test-q"><div class="q-text">Q3. What does O(1) mean?</div><div class="test-opt"><input type="radio" name="q3" id="q3a" value="1"><label for="q3a">Constant time</label></div><div class="test-opt"><input type="radio" name="q3" id="q3b" value="0"><label for="q3b">Linear time</label></div><div class="test-opt"><input type="radio" name="q3" id="q3c" value="0"><label for="q3c">Logarithmic time</label></div></div>
+    <div id="test-result" style="font-size:13px;font-weight:600;margin-top:14px;font-family:'Geist Mono',monospace"></div>
+    <div class="modal-footer"><button class="btn btn-green" onclick="submitTest()">Submit</button><button class="btn btn-ghost" onclick="closeModal()">Cancel</button></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="confirm-modal">
+  <div class="modal">
+    <h3>Confirm &amp; Review Session</h3>
+    <p>Confirm the session was completed and optionally leave a review for your provider.</p>
+    <input type="hidden" id="confirm-req-id">
+    <div style="margin-bottom:6px;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;font-family:'JetBrains Mono',monospace">Star Rating <span style="color:var(--muted);font-weight:400;text-transform:none">(optional)</span></div>
+    <div style="display:flex;gap:6px;margin-bottom:20px">
+      <span class="cstar" data-v="1" onclick="setConfirmRating(1)">★</span>
+      <span class="cstar" data-v="2" onclick="setConfirmRating(2)">★</span>
+      <span class="cstar" data-v="3" onclick="setConfirmRating(3)">★</span>
+      <span class="cstar" data-v="4" onclick="setConfirmRating(4)">★</span>
+      <span class="cstar" data-v="5" onclick="setConfirmRating(5)">★</span>
+    </div>
+    <div style="margin-bottom:8px;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;font-family:'JetBrains Mono',monospace">Written Review <span style="color:var(--muted);font-weight:400;text-transform:none">(optional)</span></div>
+    <textarea id="confirm-review-inp" placeholder="How was the session? Was the provider clear, patient, helpful?" maxlength="300"
+      style="width:100%;padding:11px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:13px;font-family:'Syne',sans-serif;resize:vertical;min-height:80px;max-height:140px;outline:none;transition:border-color .15s,box-shadow .15s;line-height:1.6"
+      onfocus="this.style.borderColor='var(--blue)';this.style.boxShadow='0 0 0 3px var(--blueg)'"
+      onblur="this.style.borderColor='var(--border)';this.style.boxShadow='none'"
+      oninput="document.getElementById('confirm-char-count').textContent=this.value.length"></textarea>
+    <div style="text-align:right;font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:4px"><span id="confirm-char-count">0</span>/300</div>
+    <div id="confirm-result" style="font-size:13px;margin-top:12px;display:none;font-family:'JetBrains Mono',monospace"></div>
+    <div class="modal-footer">
+      <button class="btn btn-green" onclick="submitConfirm()">✓ Confirm Session</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="endorse-modal">
+  <div class="modal">
+    <h3>Rate &amp; Review</h3>
+    <p>Reviewing <strong id="endorse-target-name" style="color:var(--text)"></strong> for <strong id="endorse-skill-name" style="color:var(--blue2)"></strong>. Your review helps the community.</p>
+    <div style="margin-bottom:6px;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;font-family:'JetBrains Mono',monospace">Star Rating</div>
+    <div class="stars" style="margin-bottom:20px"><span class="star" data-v="1" onclick="setRating(1)">★</span><span class="star" data-v="2" onclick="setRating(2)">★</span><span class="star" data-v="3" onclick="setRating(3)">★</span><span class="star" data-v="4" onclick="setRating(4)">★</span><span class="star" data-v="5" onclick="setRating(5)">★</span></div>
+    <div style="margin-bottom:8px;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;font-family:'JetBrains Mono',monospace">Written Review <span style="color:var(--muted);font-weight:400;text-transform:none">(optional)</span></div>
+    <textarea id="review-text-inp" placeholder="How was the session? Was the provider clear, patient, helpful?" maxlength="300"
+      style="width:100%;padding:11px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:13px;font-family:'Syne',sans-serif;resize:vertical;min-height:80px;max-height:160px;outline:none;transition:border-color .15s,box-shadow .15s;line-height:1.6"
+      onfocus="this.style.borderColor='var(--blue)';this.style.boxShadow='0 0 0 3px var(--blueg)'"
+      onblur="this.style.borderColor='var(--border)';this.style.boxShadow='none'"
+      oninput="document.getElementById('review-char-count').textContent=this.value.length"></textarea>
+    <div style="text-align:right;font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:4px"><span id="review-char-count">0</span>/300</div>
+    <div id="endorse-result" style="font-size:13px;margin-top:12px;margin-bottom:4px;display:none;font-family:'JetBrains Mono',monospace"></div>
+    <div class="modal-footer"><button class="btn btn-blue" onclick="submitEndorse()">Submit Review</button><button class="btn btn-ghost" onclick="closeModal()">Cancel</button></div>
+  </div>
+</div>
+
+{% endif %}
+
+
+<script>
+// ── NOTIFICATIONS ──
+let notifOpen = false;
+function toggleNotifDropdown() {
+  notifOpen = !notifOpen;
+  document.getElementById('notif-dropdown').classList.toggle('open', notifOpen);
+  if (notifOpen) loadNotifications();
+}
+document.addEventListener('click', e => {
+  const wrap = document.querySelector('.notif-wrap');
+  if (wrap && !wrap.contains(e.target)) { notifOpen = false; document.getElementById('notif-dropdown')?.classList.remove('open'); }
+});
+const NOTIF_ICONS = { match:'🎯', credit:'💰', verified:'⭐', system:'🔔' };
+function timeAgo(ts) {
+  const s = Math.floor(Date.now()/1000 - ts);
+  if (s < 60) return 'just now';
+  if (s < 3600) return Math.floor(s/60) + 'm ago';
+  if (s < 86400) return Math.floor(s/3600) + 'h ago';
+  return Math.floor(s/86400) + 'd ago';
+}
+async function loadNotifications() {
+  const res = await fetch('/notifications'); const data = await res.json();
+  const list = document.getElementById('nd-list');
+  const badge = document.getElementById('notif-badge');
+  if (data.unread > 0) { badge.textContent = data.unread > 9 ? '9+' : data.unread; badge.classList.add('show'); } else { badge.classList.remove('show'); }
+  if (!data.notifications.length) { list.innerHTML = '<div class="nd-empty">No notifications yet</div>'; return; }
+  list.innerHTML = data.notifications.map(n => `<a class="nd-item ${n.read?'':'unread'}" href="${n.link||'#'}" onclick="markRead(${n.id})">${!n.read?'<span class="nd-unread-dot"></span>':''}<div class="nd-icon ${n.type}">${NOTIF_ICONS[n.type]||'🔔'}</div><div class="nd-body"><div class="nd-item-title">${n.title}</div><div class="nd-item-body">${n.body}</div><div class="nd-item-time">${timeAgo(n.timestamp)}</div></div></a>`).join('');
+}
+async function markRead(id) { await fetch('/notifications/read',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})}); }
+async function markAllRead() { await fetch('/notifications/read',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({all:true})}); loadNotifications(); }
+async function clearAll() { await fetch('/notifications/clear',{method:'POST',headers:{'Content-Type':'application/json'}}); loadNotifications(); }
+async function pollNotifCount() {
+  try { const res=await fetch('/notifications/count'); const data=await res.json(); const b=document.getElementById('notif-badge'); if(b){ if(data.count>0){b.textContent=data.count>9?'9+':data.count;b.classList.add('show');}else{b.classList.remove('show');} } } catch(e){}
+}
+setInterval(pollNotifCount, 10000); pollNotifCount();
+
+// Format review timestamps
+document.querySelectorAll('.rev-ts[data-ts]').forEach(el => {
+  el.textContent = timeAgo(parseFloat(el.dataset.ts));
+});
+
+// ── CREDIT HISTORY ──
+async function loadCreditHistory() {
+  const res=await fetch('/credits/history'); const data=await res.json();
+  const list=document.getElementById('credit-log-list');
+  const countEl=document.getElementById('credit-count');
+  if(countEl) countEl.textContent=data.logs.length;
+  let tin=0,tout=0,thold=0;
+  data.logs.forEach(l=>{ if(l.direction==='in'||l.direction==='refund')tin+=l.amount; if(l.direction==='out')tout+=l.amount; if(l.direction==='hold')thold+=l.amount; });
+  const ie=document.getElementById('total-in'); const oe=document.getElementById('total-out'); const he=document.getElementById('total-hold');
+  if(ie)ie.textContent='+'+tin; if(oe)oe.textContent='-'+tout; if(he)he.textContent=thold;
+  const A={in:'+',out:'−',hold:'⇡',refund:'↩'};
+  if(!data.logs.length){list.innerHTML='<div style="padding:40px;text-align:center;color:var(--text4);font-size:12px;font-family:\'Geist Mono\',monospace">No transactions yet</div>';return;}
+  list.innerHTML=data.logs.map(l=>`<div class="credit-log-item"><div class="cl-arrow ${l.direction}">${A[l.direction]||'·'}</div><div style="flex:1"><div class="cl-reason">${l.reason}</div><div class="cl-time">${timeAgo(l.timestamp)}</div></div><div style="text-align:right"><div class="cl-amount ${l.direction}">${A[l.direction]||''}${l.amount} cr</div><div class="cl-balance">bal: ${l.balance_after} cr</div></div></div>`).join('');
+}
+
+// ── TABS ──
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.tab').forEach(t=>{ if(t.getAttribute('onclick')==="switchTab('"+id+"')")t.classList.add('active'); });
+  if(id==='credits') loadCreditHistory();
+}
+
+// ── SKILLS PREVIEW ──
+document.addEventListener('DOMContentLoaded',()=>{
+  const inp=document.getElementById('skills-inp');
+  if(inp){inp.addEventListener('input',()=>{ const p=document.getElementById('skills-preview'); p.innerHTML=inp.value.split(',').map(s=>s.trim()).filter(Boolean).map(s=>`<span class="skill-chip">${s}</span>`).join(''); });}
+  const zone=document.getElementById('upload-zone');
+  if(zone){
+    zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('drag');});
+    zone.addEventListener('dragleave',()=>zone.classList.remove('drag'));
+    zone.addEventListener('drop',e=>{e.preventDefault();zone.classList.remove('drag');const f=e.dataTransfer.files[0];if(f){const i=document.getElementById('proof-file-inp');const dt=new DataTransfer();dt.items.add(f);i.files=dt.files;onFileSelected(i);}});
+  }
+});
+
+// ── SKILLS ──
+async function saveSkills() {
+  const skills=document.getElementById('skills-inp').value;
+  const portfolio=document.getElementById('portfolio-inp')?document.getElementById('portfolio-inp').value:'';
+  const fb=document.getElementById('skills-fb'); const btn=document.getElementById('save-skills-btn');
+  btn.disabled=true; btn.textContent='Saving…';
+  const res=await fetch('/update-skills',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({skills,portfolio})});
+  const data=await res.json();
+  if(data.success){fb.textContent='✓ Saved!';fb.className='fb fb-ok';setTimeout(()=>{fb.textContent='';location.reload();},1600);}
+  else{fb.textContent='✗ '+(data.error||'Error');fb.className='fb fb-err';}
+  btn.disabled=false;btn.textContent='Save Skills';
+}
+let selectedFile=null;
+function onFileSelected(input){
+  const file=input.files[0]; if(!file)return; selectedFile=file;
+  document.getElementById('fp-name').textContent=file.name;
+  document.getElementById('fp-size').textContent=(file.size/1024).toFixed(1)+' KB';
+  document.getElementById('file-preview-wrap').style.display='block';
+  const thumb=document.getElementById('fp-thumb');
+  if(file.type.startsWith('image/')){const r=new FileReader();r.onload=e=>{thumb.innerHTML=`<img src="${e.target.result}">`;};r.readAsDataURL(file);}else{thumb.innerHTML='📄';}
+}
+function clearFile(){selectedFile=null;document.getElementById('proof-file-inp').value='';document.getElementById('file-preview-wrap').style.display='none';document.getElementById('fp-thumb').innerHTML='📄';}
+async function uploadFile(){
+  const skill=document.getElementById('file-skill-inp').value.trim();
+  const fb=document.getElementById('upload-fb');
+  if(!selectedFile){fb.textContent='⚠ Choose a file first';fb.className='fb fb-err';return;}
+  if(!skill){fb.textContent='⚠ Enter the skill name';fb.className='fb fb-err';return;}
+  if(selectedFile.size>5*1024*1024){fb.textContent='⚠ Max 5 MB';fb.className='fb fb-err';return;}
+  fb.textContent='⬆ Uploading…';fb.className='fb';
+  const form=new FormData();form.append('proof_file',selectedFile);form.append('skill_for_file',skill);form.append('skills',document.getElementById('skills-inp').value);
+  const res=await fetch('/update-skills',{method:'POST',body:form});const data=await res.json();
+  if(data.success){fb.textContent='✓ Uploaded!';fb.className='fb fb-ok';clearFile();setTimeout(()=>{fb.textContent='';location.reload();},1800);}
+  else{fb.textContent='✗ '+(data.error||'Failed');fb.className='fb fb-err';}
+}
+
+// ── REQUEST ──
+async function submitRequest(){
+  const skill=document.getElementById('req-skill').value.trim();
+  const duration=document.getElementById('req-duration').value;
+  const priority=document.getElementById('req-priority').value;
+  const cost=document.getElementById('req-cost').value;
+  const fb=document.getElementById('req-fb'); const btn=document.getElementById('submit-btn');
+  if(!skill){fb.textContent='⚠ Enter a skill';fb.className='fb fb-err';return;}
+  btn.disabled=true;btn.textContent='Submitting…';fb.textContent='';
+  const res=await fetch('/request-skill',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({skill,duration,priority,credit_cost:parseInt(cost)})});
+  const data=await res.json();
+  if(data.success){fb.textContent='✓ Submitted!';fb.className='fb fb-ok';setTimeout(()=>{fb.textContent='';location.reload();},1800);}
+  else{fb.textContent='✗ '+(data.error||'Failed');fb.className='fb fb-err';}
+  btn.disabled=false;btn.textContent='Submit Request';
+}
+
+// ── CONFIRM / DISPUTE ──
+async function confirmDone(reqId,btn){
+  btn.disabled=true;btn.textContent='…';
+  const res=await fetch('/confirm-completion',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({request_id:reqId})});
+  const data=await res.json();
+  if(data.success){btn.textContent=data.status==='released'?'✓ Released!':'✓ Confirmed';btn.style.background='var(--green)';setTimeout(()=>location.reload(),1500);}
+  else{btn.textContent='✗';btn.disabled=false;}
+}
+async function disputeRequest(reqId,btn){
+  if(!confirm('Dispute this? Credits will be refunded.'))return;
+  btn.disabled=true;btn.textContent='…';
+  const res=await fetch('/dispute',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({request_id:reqId})});
+  const data=await res.json();
+  if(data.success){btn.textContent='↩';setTimeout(()=>location.reload(),1200);}
+  else{btn.textContent='✗';btn.disabled=false;}
+}
+
+// ── SKILL TEST ──
+function openTestModal(){document.getElementById('test-modal').classList.add('open');document.getElementById('test-result').textContent='';['q1','q2','q3'].forEach(q=>document.querySelectorAll(`input[name="${q}"]`).forEach(r=>r.checked=false));}
+function closeModal(){document.querySelectorAll('.modal-bg').forEach(m=>m.classList.remove('open'));}
+async function submitTest(){
+  const skill=document.getElementById('test-skill-inp').value.trim();
+  if(!skill){document.getElementById('test-result').textContent='⚠ Enter skill name';return;}
+  let correct=0;['q1','q2','q3'].forEach(q=>{const s=document.querySelector(`input[name="${q}"]:checked`);if(s&&s.value==='1')correct++;});
+  const score=Math.round((correct/3)*100);
+  const res=await fetch('/skill-test',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({skill,score})});
+  const data=await res.json();
+  const el=document.getElementById('test-result');
+  el.style.color=score>=70?'var(--green)':'var(--red)';
+  el.textContent=score>=70?`✓ ${score}% — ${data.verified?'⭐ Verified!':'Passed!'} +${data.bonus} credits`:`✗ ${score}% — Need ≥70%`;
+  setTimeout(()=>{closeModal();location.reload();},2000);
+}
+
+// ── CONFIRM MODAL ──
+let confirmRating = 0;
+function openConfirmModal(reqId) {
+  confirmRating = 0;
+  document.getElementById('confirm-req-id').value = reqId;
+  document.getElementById('confirm-review-inp').value = '';
+  document.getElementById('confirm-char-count').textContent = '0';
+  document.getElementById('confirm-result').style.display = 'none';
+  document.querySelectorAll('.cstar').forEach(s => s.classList.remove('on'));
+  document.getElementById('confirm-modal').classList.add('open');
+}
+function setConfirmRating(v) {
+  confirmRating = v;
+  document.querySelectorAll('.cstar').forEach(s => s.classList.toggle('on', parseInt(s.dataset.v) <= v));
+}
+async function submitConfirm() {
+  const reqId      = document.getElementById('confirm-req-id').value;
+  const reviewText = document.getElementById('confirm-review-inp').value.trim();
+  const btn        = document.querySelector('#confirm-modal .btn-green');
+  const resEl      = document.getElementById('confirm-result');
+  btn.disabled = true; btn.textContent = '…';
+  const body = { request_id: reqId };
+  if (confirmRating) body.rating = confirmRating;
+  if (reviewText)    body.review_text = reviewText;
+  const res  = await fetch('/confirm-completion', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(body)
+  });
+  const data = await res.json();
+  if (data.success) {
+    resEl.style.display = 'block';
+    resEl.style.color   = 'var(--green)';
+    resEl.textContent   = data.status === 'released' ? '✓ Session confirmed — credits released!' : '✓ Confirmed — waiting for provider.';
+    setTimeout(() => { closeModal(); location.reload(); }, 1800);
+  } else {
+    resEl.style.display = 'block';
+    resEl.style.color   = 'var(--red)';
+    resEl.textContent   = '✗ ' + (data.error || 'Error');
+    btn.disabled = false; btn.textContent = '✓ Confirm Session';
+  }
+}
+
+// ── ENDORSE ──
+let endorseTarget='',endorseSkill='',ratingValue=0;
+function openEndorse(uid,skill){endorseTarget=uid;endorseSkill=skill;document.getElementById('endorse-target-name').textContent=uid;document.getElementById('endorse-skill-name').textContent=skill;document.getElementById('endorse-result').style.display='none';ratingValue=0;document.querySelectorAll('.star').forEach(s=>s.classList.remove('on'));const rti=document.getElementById('review-text-inp');if(rti){rti.value='';document.getElementById('review-char-count').textContent='0';}document.getElementById('endorse-modal').classList.add('open');}
+function setRating(v){ratingValue=v;document.querySelectorAll('.star').forEach(s=>s.classList.toggle('on',parseInt(s.dataset.v)<=v));}
+async function submitEndorse(){
+  const reviewText = document.getElementById('review-text-inp').value.trim();
+  const res=await fetch('/endorse',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({provider_id:endorseTarget,skill:endorseSkill,review_text:reviewText,rating:ratingValue})});
+  const data=await res.json();const el=document.getElementById('endorse-result');el.style.display='block';
+  if(data.success){el.style.color='var(--green)';el.textContent='✓ Review submitted! '+data.endorsements+' endorsement(s).';setTimeout(()=>{closeModal();location.reload();},1800);}
+  else{el.style.color='var(--red)';el.textContent='✗ '+(data.error||'Error');}
+}
+
+// ── RESET ──
+async function requestReset(btn){
+  btn.disabled=true;btn.textContent='Applying…';const fb=document.getElementById('reset-fb');
+  const res=await fetch('/request-reset',{method:'POST',headers:{'Content-Type':'application/json'}});const data=await res.json();
+  if(data.success){fb.textContent='✓ '+data.message;fb.className='fb fb-ok';setTimeout(()=>location.reload(),2000);}
+  else{fb.textContent='✗ '+(data.error||'Error');fb.className='fb fb-err';btn.disabled=false;btn.textContent='↺ Reset My Trial';}
+}
+
+// ── PROOF REVIEW ──
+async function reviewProof(uid,skill,index,action,btn){
+  btn.disabled=true;btn.textContent='…';
+  const res=await fetch('/approve-proof',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid,skill,index,action})});
+  const data=await res.json();const row=document.getElementById(`proof-row-${uid}-${skill}-${index}`);
+  if(data.success){if(row){row.style.opacity='0.35';row.querySelectorAll('button').forEach(b=>b.disabled=true);row.querySelector('td:last-child').innerHTML=action==='approve'?'<span class="badge b-verified">⭐ Approved</span>':'<span class="badge b-disputed">✗ Rejected</span>';}}
+  else{btn.disabled=false;btn.textContent=action==='approve'?'✓ Approve':'✗ Reject';alert(data.error||'Error');}
+}
+
+// ── ADMIN MATCHING ──
+async function runMatching(){
+  const res=await fetch('/run-matching',{method:'POST'});const data=await res.json();
+  const el=document.getElementById('match-result');
+  el.textContent=data.count>0?`✓ ${data.count} match(es): `+data.matches.map(m=>`${m.requester} ↔ ${m.provider} [${m.skill}]`).join(', '):'No new matches found.';
+  el.classList.add('show');setTimeout(()=>{el.classList.remove('show');location.reload();},3000);
+}
+</script>
+</body>
+</html>
+
+</body>
+</html>
+</body>
+</html>

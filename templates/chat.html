@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat — {{ other_user.name }} · X-Lurn</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#05060a;--bg2:#090b11;--bg3:#0d1018;--bg4:#131720;--bg5:#181d28;
+  --border:rgba(99,115,165,.12);--border2:rgba(99,115,165,.22);
+  --text:#e2e6f3;--sub:#7a839e;--muted:#3d4459;
+  --blue:#4d7cfe;--blue2:#6b95ff;
+  --blueg:rgba(77,124,254,.1);--blueg2:rgba(77,124,254,.18);
+  --green:#1fd98a;--greeng:rgba(31,217,138,.08);
+  --amber:#f5a623;--red:#ff4d6a;
+  --purple:#9b6dff;--purpleg:rgba(155,109,255,.08);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);
+  -webkit-font-smoothing:antialiased;display:flex;flex-direction:column;
+  background-image:linear-gradient(rgba(77,124,254,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(77,124,254,.025) 1px,transparent 1px);
+  background-size:48px 48px}
+a{text-decoration:none;color:inherit}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(31,217,138,.4)}70%{box-shadow:0 0 0 6px rgba(31,217,138,0)}}
+@keyframes typing{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-6px);opacity:1}}
+@keyframes scan{from{transform:translateX(-100%)}to{transform:translateX(400%)}}
+
+.topbar{height:58px;flex-shrink:0;background:rgba(9,11,17,.95);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;gap:16px;position:relative}
+.topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(77,124,254,.3),transparent)}
+.back-btn{display:flex;align-items:center;gap:7px;color:var(--sub);font-size:13px;font-weight:600;
+  padding:7px 12px;border-radius:9px;border:1px solid var(--border);transition:all .15s;flex-shrink:0;
+  font-family:'JetBrains Mono',monospace}
+.back-btn:hover{color:var(--text);border-color:var(--border2);background:var(--bg3)}
+.topbar-logo{display:flex;align-items:center;gap:9px;margin-right:auto}
+.tl-icon{width:30px;height:30px;background:linear-gradient(135deg,var(--blue),var(--purple));
+  border-radius:9px;display:grid;place-items:center;font-size:14px;position:relative;overflow:hidden}
+.tl-icon::after{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);animation:scan 3s ease infinite}
+.tl-name{font-size:15px;font-weight:800;letter-spacing:.3px}
+.req-id-badge{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;
+  background:var(--bg3);border:1px solid var(--border);padding:4px 10px;border-radius:8px;letter-spacing:.5px}
+
+.chat-layout{flex:1;display:flex;overflow:hidden;max-width:960px;width:100%;margin:0 auto;padding:20px 20px 0;gap:20px}
+
+.chat-sidebar{width:260px;flex-shrink:0;display:flex;flex-direction:column;gap:14px}
+.info-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:20px;position:relative;overflow:hidden}
+.info-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--blue),var(--purple))}
+.ic-label{font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1.8px;text-transform:uppercase;font-family:'JetBrains Mono',monospace;margin-bottom:14px}
+.user-row{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.ur-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--blueg2),var(--purpleg));
+  border:2px solid rgba(77,124,254,.25);display:grid;place-items:center;font-size:18px;font-weight:800;color:var(--blue2);flex-shrink:0}
+.ur-name{font-size:14px;font-weight:700}
+.ur-handle{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:2px}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
+.info-row:last-child{border-bottom:none}
+.ir-label{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.ir-val{font-size:12px;font-weight:600}
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.b-active{background:var(--blueg);color:var(--blue2);border:1px solid rgba(77,124,254,.2)}
+.b-assigned{background:var(--blueg);color:var(--blue2);border:1px solid rgba(77,124,254,.2)}
+.b-completed{background:var(--greeng);color:var(--green);border:1px solid rgba(31,217,138,.2)}
+.b-disputed{background:rgba(255,77,106,.08);color:#ff4d6a;border:1px solid rgba(255,77,106,.2)}
+.online-dot{width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;
+  margin-right:6px;box-shadow:0 0 6px var(--green);animation:pulse 2s infinite}
+.tip-item{font-size:12px;color:var(--sub);line-height:1.65;display:flex;gap:8px;align-items:flex-start}
+
+.chat-main{flex:1;display:flex;flex-direction:column;background:var(--bg2);border:1px solid var(--border);
+  border-radius:16px 16px 0 0;overflow:hidden;min-width:0;position:relative}
+.chat-main::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--blue),var(--purple),transparent)}
+
+.chat-header{padding:14px 20px;border-bottom:1px solid var(--border);background:var(--bg3);
+  display:flex;align-items:center;gap:14px;flex-shrink:0}
+.ch-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--blueg2),var(--purpleg));
+  border:2px solid rgba(77,124,254,.25);display:grid;place-items:center;font-size:16px;font-weight:800;color:var(--blue2);flex-shrink:0}
+.ch-name{font-size:14px;font-weight:700}
+.ch-status{font-size:12px;color:var(--sub);margin-top:3px;display:flex;align-items:center}
+.ch-meta{margin-left:auto;text-align:right;font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+
+.messages{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth}
+.messages::-webkit-scrollbar{width:4px}
+.messages::-webkit-scrollbar-track{background:transparent}
+.messages::-webkit-scrollbar-thumb{background:var(--muted);border-radius:2px}
+
+.date-sep{display:flex;align-items:center;gap:12px;font-size:10px;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;letter-spacing:.8px;text-transform:uppercase;margin:4px 0}
+.date-sep::before,.date-sep::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.msg{display:flex;gap:10px;animation:slideIn .2s ease both;max-width:76%}
+.msg.mine{align-self:flex-end;flex-direction:row-reverse}
+.msg.theirs{align-self:flex-start}
+.msg-avatar{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;
+  font-size:13px;font-weight:800;flex-shrink:0;align-self:flex-end}
+.msg.mine .msg-avatar{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff}
+.msg.theirs .msg-avatar{background:linear-gradient(135deg,rgba(31,217,138,.15),rgba(56,217,245,.15));
+  color:var(--green);border:1px solid rgba(31,217,138,.2)}
+.msg-body{display:flex;flex-direction:column;gap:4px;min-width:0}
+.msg-name{font-size:10px;font-weight:700;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:.5px}
+.msg.mine .msg-name{text-align:right}
+.msg-bubble{padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.6;font-weight:400;word-break:break-word}
+.msg.theirs .msg-bubble{background:var(--bg4);border:1px solid var(--border2);border-bottom-left-radius:4px;color:var(--text)}
+.msg.mine .msg-bubble{background:linear-gradient(135deg,var(--blue),#3a5fd4);color:#fff;border:none;
+  border-bottom-right-radius:4px;box-shadow:0 4px 14px rgba(77,124,254,.2)}
+.msg-time{font-size:9px;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:.3px}
+.msg.mine .msg-time{text-align:right}
+
+.typing-indicator{display:none;align-self:flex-start;padding:10px 14px;background:var(--bg4);
+  border:1px solid var(--border2);border-radius:14px;border-bottom-left-radius:4px;gap:4px;align-items:center}
+.typing-indicator.show{display:flex}
+.typing-dot{width:6px;height:6px;border-radius:50%;background:var(--sub);animation:typing .8s ease-in-out infinite}
+.typing-dot:nth-child(2){animation-delay:.15s}
+.typing-dot:nth-child(3){animation-delay:.3s}
+
+.empty-chat{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted);gap:12px}
+.empty-chat-icon{font-size:44px;opacity:.25}
+.empty-chat-text{font-size:13px;font-family:'JetBrains Mono',monospace;letter-spacing:.5px}
+
+.input-bar{padding:14px 16px;border-top:1px solid var(--border);background:var(--bg3);
+  display:flex;gap:10px;align-items:flex-end;flex-shrink:0}
+.input-wrap{flex:1}
+#msg-input{width:100%;padding:11px 16px;background:var(--bg4);border:1px solid var(--border2);
+  border-radius:12px;color:var(--text);font-size:14px;font-family:'Syne',sans-serif;
+  resize:none;outline:none;transition:border-color .15s,box-shadow .15s;
+  max-height:120px;min-height:44px;line-height:1.5}
+#msg-input::placeholder{color:var(--muted)}
+#msg-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blueg)}
+.send-btn{width:44px;height:44px;border-radius:12px;border:none;
+  background:linear-gradient(135deg,var(--blue),#3a5fd4);color:#fff;font-size:18px;cursor:pointer;
+  display:grid;place-items:center;flex-shrink:0;transition:transform .12s,box-shadow .12s;
+  box-shadow:0 4px 12px rgba(77,124,254,.25)}
+.send-btn:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(77,124,254,.35)}
+.send-btn:active{transform:translateY(0)}
+.send-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.closed-notice{text-align:center;padding:12px 20px;font-size:12px;color:var(--muted);
+  background:var(--bg3);border-top:1px solid var(--border);font-family:'JetBrains Mono',monospace;
+  letter-spacing:.3px;flex-shrink:0}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="/dashboard" class="back-btn">← Back</a>
+  <div class="topbar-logo">
+    <div class="tl-icon">⚡</div>
+    <div class="tl-name">X-Lurn</div>
+  </div>
+  <div class="req-id-badge">{{ req_id }}</div>
+</div>
+
+<div class="chat-layout">
+  <div class="chat-sidebar">
+    <div class="info-card">
+      <div class="ic-label">Session Info</div>
+      <div class="user-row">
+        <div class="ur-avatar">{{ other_user.name[0].upper() }}</div>
+        <div>
+          <div class="ur-name">{{ other_user.name }}</div>
+          <div class="ur-handle">@{{ other_user.id }}</div>
+        </div>
+      </div>
+      <div class="info-row">
+        <span class="ir-label">Skill</span>
+        <span class="ir-val" style="color:var(--amber)">{{ req.skill }}</span>
+      </div>
+      <div class="info-row">
+        <span class="ir-label">Status</span>
+        <span class="badge b-{{ req.status.lower() }}">{{ req.status }}</span>
+      </div>
+      <div class="info-row">
+        <span class="ir-label">Duration</span>
+        <span class="ir-val">{{ req.duration or 'Flexible' }}</span>
+      </div>
+      <div class="info-row">
+        <span class="ir-label">Your role</span>
+        <span class="ir-val" style="color:{% if current_user.id == req.requester_id %}var(--blue2){% else %}var(--green){% endif %}">
+          {% if current_user.id == req.requester_id %}Requester{% else %}Provider{% endif %}
+        </span>
+      </div>
+    </div>
+
+    <div class="info-card" style="border-top:2px solid var(--green)">
+      <div class="ic-label">Tips</div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="tip-item"><span>💡</span><span>Agree on a time and format before starting.</span></div>
+        <div class="tip-item"><span>🔒</span><span>Credits release only when both confirm in the dashboard.</span></div>
+        <div class="tip-item"><span>⚠</span><span>Something wrong? Use the Dispute button in Activity tab.</span></div>
+      </div>
+    </div>
+
+    <div class="info-card" style="background:transparent">
+      <div class="ic-label">Stats</div>
+      <div class="info-row">
+        <span class="ir-label">Messages</span>
+        <span class="ir-val" id="msg-count" style="color:var(--blue2);font-family:'JetBrains Mono',monospace">{{ messages|length }}</span>
+      </div>
+      <div class="info-row" style="border-bottom:none">
+        <span class="ir-label">Connection</span>
+        <span style="display:flex;align-items:center">
+          <span class="online-dot"></span>
+          <span style="font-size:11px;color:var(--green)">Live</span>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="chat-main">
+    <div class="chat-header">
+      <div class="ch-avatar">{{ other_user.name[0].upper() }}</div>
+      <div>
+        <div class="ch-name">{{ other_user.name }}</div>
+        <div class="ch-status">
+          <span class="online-dot"></span>Active session · {{ req.skill }}
+        </div>
+      </div>
+      <div class="ch-meta">
+        <div>{{ req_id }}</div>
+        <div style="margin-top:3px"><span class="badge b-{{ req.status.lower() }}">{{ req.status }}</span></div>
+      </div>
+    </div>
+
+    <div class="messages" id="messages-container">
+      {% if not messages %}
+      <div class="empty-chat" id="empty-state">
+        <div class="empty-chat-icon">💬</div>
+        <div class="empty-chat-text">No messages yet — say hello!</div>
+      </div>
+      {% else %}
+      <div class="date-sep">Session started</div>
+      {% for msg in messages %}
+      <div class="msg {% if msg.sender == current_user.id %}mine{% else %}theirs{% endif %}">
+        <div class="msg-avatar">{{ msg.sender_name[0].upper() }}</div>
+        <div class="msg-body">
+          <div class="msg-name">{{ msg.sender_name }}</div>
+          <div class="msg-bubble">{{ msg.text }}</div>
+          <div class="msg-time" data-ts="{{ msg.timestamp }}">{{ msg.timestamp | int }}</div>
+        </div>
+      </div>
+      {% endfor %}
+      {% endif %}
+      <div class="typing-indicator" id="typing">
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+      </div>
+    </div>
+
+    {% if req.status in ['Active', 'Assigned'] %}
+    <div class="input-bar">
+      <div class="input-wrap">
+        <textarea id="msg-input" placeholder="Type a message… (Enter to send, Shift+Enter for new line)" rows="1"></textarea>
+      </div>
+      <button class="send-btn" id="send-btn" onclick="sendMessage()">&#10148;</button>
+    </div>
+    {% else %}
+    <div class="closed-notice">
+      This session is {{ req.status.lower() }} — chat is read-only
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+var REQ_ID   = "{{ req_id }}";
+var MY_UID   = "{{ current_user.id }}";
+var CAN_SEND = {{ 'true' if req.status in ['Active', 'Assigned'] else 'false' }};
+var nextIndex = {{ messages|length }};
+var pollTimer = null;
+
+function fmtTime(ts) {
+  var d = new Date(ts * 1000);
+  return d.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+}
+
+document.querySelectorAll('.msg-time[data-ts]').forEach(function(el) {
+  el.textContent = fmtTime(parseFloat(el.dataset.ts));
+});
+
+function scrollBottom(smooth) {
+  var c = document.getElementById('messages-container');
+  c.scrollTo({top: c.scrollHeight, behavior: smooth ? 'smooth' : 'instant'});
+}
+scrollBottom(false);
+
+function escHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/\n/g, '<br>');
+}
+
+function renderMsg(msg) {
+  var isMine = msg.sender === MY_UID;
+  var empty = document.getElementById('empty-state');
+  if (empty) empty.remove();
+  if (nextIndex === 0) {
+    var sep = document.createElement('div');
+    sep.className = 'date-sep';
+    sep.textContent = 'Session started';
+    document.getElementById('messages-container').insertBefore(sep, document.getElementById('typing'));
+  }
+  var div = document.createElement('div');
+  div.className = 'msg ' + (isMine ? 'mine' : 'theirs');
+  div.innerHTML =
+    '<div class="msg-avatar">' + msg.sender_name[0].toUpperCase() + '</div>' +
+    '<div class="msg-body">' +
+      '<div class="msg-name">' + msg.sender_name + '</div>' +
+      '<div class="msg-bubble">' + escHtml(msg.text) + '</div>' +
+      '<div class="msg-time">' + fmtTime(msg.timestamp) + '</div>' +
+    '</div>';
+  document.getElementById('messages-container').insertBefore(div, document.getElementById('typing'));
+  document.getElementById('msg-count').textContent = msg.id + 1;
+  scrollBottom(true);
+}
+
+function sendMessage() {
+  if (!CAN_SEND) return;
+  var input = document.getElementById('msg-input');
+  var btn   = document.getElementById('send-btn');
+  var text  = input.value.trim();
+  if (!text) return;
+  btn.disabled = true;
+  input.value  = '';
+  input.style.height = 'auto';
+  fetch('/chat/send/' + REQ_ID, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({text: text})
+  })
+  .then(function(res) { return res.json(); })
+  .then(function(data) {
+    if (data.success) {
+      renderMsg(data.message);
+      nextIndex = data.message.id + 1;
+    }
+  })
+  .catch(function(e) { console.error('Send failed:', e); })
+  .finally(function() {
+    btn.disabled = false;
+    input.focus();
+  });
+}
+
+function poll() {
+  fetch('/chat/poll/' + REQ_ID + '?since=' + nextIndex)
+  .then(function(res) { return res.json(); })
+  .then(function(data) {
+    if (data.success && data.messages.length > 0) {
+      data.messages.forEach(function(msg) {
+        if (msg.sender !== MY_UID) renderMsg(msg);
+      });
+      nextIndex = data.total;
+    }
+  })
+  .catch(function(e) {})
+  .finally(function() {
+    pollTimer = setTimeout(poll, 2000);
+  });
+}
+
+var input = document.getElementById('msg-input');
+if (input) {
+  input.addEventListener('input', function() {
+    input.style.height = 'auto';
+    input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+  });
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+  input.focus();
+}
+
+if (CAN_SEND || nextIndex > 0) poll();
+</script>
+</body>
+</html>
