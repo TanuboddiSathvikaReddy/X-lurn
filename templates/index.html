@@ -435,7 +435,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{ a.addEventListener('click
 
 {% if user.role == 'admin' %}
 
-<div class="page active" id="page-overview">
+<div class="page" id="page-overview">
   <div class="stats">
     <div class="stat s-green fade-up"> <div class="stat-lbl">Users</div>      <div class="stat-num">{{ users_count }}</div></div>
     <div class="stat s-amber fade-up"> <div class="stat-lbl">Pending</div>    <div class="stat-num">{{ pending_count }}</div></div>
@@ -842,14 +842,16 @@ async function loadCreditHistory() {
 
 // ── TABS ──
 function switchTab(id) {
-  document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
-  document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
-  var page = document.getElementById('page-' + id);
-  if (page) page.classList.add('active');
-  document.querySelectorAll('.tab').forEach(function(t) {
-    var oc = t.getAttribute('onclick') || '';
-    if (oc.indexOf("switchTab('" + id + "')") !== -1) t.classList.add('active');
-  });
+  var tabs = document.querySelectorAll('.tab');
+  var pages = document.querySelectorAll('.page');
+  for (var i = 0; i < tabs.length; i++) tabs[i].classList.remove('active');
+  for (var i = 0; i < pages.length; i++) pages[i].classList.remove('active');
+  var pg = document.getElementById('page-' + id);
+  if (pg) pg.classList.add('active');
+  for (var i = 0; i < tabs.length; i++) {
+    var oc = tabs[i].getAttribute('onclick') || '';
+    if (oc === "switchTab('" + id + "')") tabs[i].classList.add('active');
+  }
   if (id === 'credits') loadCreditHistory();
 }
 
