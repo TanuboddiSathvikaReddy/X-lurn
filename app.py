@@ -1192,14 +1192,16 @@ def test_gemini():
     api_key = os.environ.get("GEMINI_API_KEY", "")
     if not api_key:
         return "NO API KEY SET"
-    # First list available models
+    payload = json.dumps({
+        "contents": [{"parts": [{"text": "Say hello in one word. Just the word."}]}]
+    }).encode("utf-8")
     try:
-        url = "https://generativelanguage.googleapis.com/v1beta/models?key=" + api_key
-        req = urllib.request.Request(url, method="GET")
+        url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + api_key
+        req = urllib.request.Request(url, data=payload,
+            headers={"Content-Type": "application/json"}, method="POST")
         with urllib.request.urlopen(req, timeout=15) as resp:
             result = json.loads(resp.read().decode("utf-8"))
-        models = [m["name"] for m in result.get("models", [])]
-        return "AVAILABLE MODELS: " + ", ".join(models)
+        return "SUCCESS: " + result["candidates"][0]["content"]["parts"][0]["text"]
     except urllib.error.HTTPError as e:
         return "HTTP ERROR " + str(e.code) + ": " + e.read().decode("utf-8")
     except Exception as e:
