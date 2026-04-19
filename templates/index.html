@@ -974,25 +974,15 @@ async function generateQuestions() {
   resultEl.textContent = '';
 
   try {
-    var response = await fetch('https://api.anthropic.com/v1/messages', {
+    var response = await fetch('/generate-questions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        messages: [{
-          role: 'user',
-          content: "Generate exactly 3 multiple choice questions to test someone's knowledge of '" + skill + "'. Return ONLY valid JSON, no markdown, no explanation. Format: {\"questions\":[{\"q\":\"question text\",\"options\":[\"option A\",\"option B\",\"option C\"],\"answer\":0}]} where answer is the index (0,1,2) of the correct option. Make questions practical and specific to " + skill + "."
-        }]
-      })
+      body: JSON.stringify({ skill: skill })
     });
 
     var data = await response.json();
-    var text = data.content[0].text.trim();
-    // Strip any markdown fences if present
-    text = text.replace(/```json/g, '').replace(/```/g, '').trim();
-    var parsed = JSON.parse(text);
-    currentQuestions = parsed.questions;
+    if (!data.success) throw new Error(data.error || 'Failed');
+    currentQuestions = data.questions;
 
     loading.style.display = 'none';
     container.style.display = 'block';

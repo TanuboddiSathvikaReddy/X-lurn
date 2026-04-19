@@ -9,7 +9,7 @@ import json
 app = Flask(__name__)
 app.secret_key = "xlurn_secret_2024"
 
-DB_PATH = "/data/xlurn.db"
+DB_PATH = "xlurn.db"
 
 # ---------------------------
 # CONSTANTS
@@ -1183,6 +1183,68 @@ def credit_history():
 
 
 # ---------------------------
+# SKILL TEST QUESTIONS ROUTE
+# ---------------------------
+
+@app.route("/generate-questions", methods=["POST"])
+def generate_questions():
+    if "user_id" not in session:
+        return jsonify({"success": False, "error": "Not logged in"}), 401
+    import urllib.request
+    import urllib.error
+    data  = request.get_json()
+    skill = (data.get("skill") or "").strip()
+    if not skill:
+        return jsonify({"success": False, "error": "Skill required"}), 400
+
+    prompt = (
+        "Generate exactly 3 multiple choice questions to test knowledge of \"" + skill + "\". "
+        "Return ONLY valid JSON with no markdown or explanation. "
+        "Format: {\"questions\":[{\"q\":\"question\",\"options\":[\"A\",\"B\",\"C\"],\"answer\":0}]} "
+        "where answer is the index (0,1,2) of the correct option. "
+        "Make questions practical and specific to " + skill + "."
+    )
+
+    payload = json.dumps({
+        "model": "claude-haiku-4-5-20251001",
+        "max_tokens": 800,
+        "messages": [{"role": "user", "content": prompt}]
+    }).encode("utf-8")
+
+    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+    if not api_key:
+        # Fallback: return generic questions if no API key
+        return jsonify({"success": True, "questions": [
+            {"q": "What is a fundamental concept in " + skill + "?",
+             "options": ["Basics", "Advanced", "Expert"], "answer": 0},
+            {"q": "How long does it typically take to learn " + skill + "?",
+             "options": ["Days", "Weeks to months", "Years of practice"], "answer": 1},
+            {"q": "Which is most important when learning " + skill + "?",
+             "options": ["Practice", "Theory only", "Neither"], "answer": 0}
+        ]})
+
+    try:
+        req = urllib.request.Request(
+            "https://api.anthropic.com/v1/messages",
+            data=payload,
+            headers={
+                "Content-Type": "application/json",
+                "x-api-key": api_key,
+                "anthropic-version": "2023-06-01"
+            },
+            method="POST"
+        )
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            result = json.loads(resp.read().decode("utf-8"))
+        text = result["content"][0]["text"].strip()
+        text = text.replace("```json", "").replace("```", "").strip()
+        parsed = json.loads(text)
+        return jsonify({"success": True, "questions": parsed["questions"]})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+# ---------------------------
 # REVIEWS ROUTE
 # ---------------------------
 
@@ -1287,11 +1349,43 @@ def chat_poll(req_id):
         m["id"] = since + i
     return jsonify({"success": True, "messages": new_msgs, "total": total})
 
+
+# ---------------------------
+# TEST ROUTES (remove before production)
+# ---------------------------
+
+@app.route("/test/force-stuck/<uid>")
+def force_stuck(uid):
+    u = get_user(uid)
+    if u:
+        u["provider_status"] = "Stuck"
+        u["stuck_since"]     = time.time() - (31 * 86400)
+        save_user(u)
+    return f"Done — {uid} is now stuck and past cooldown"
+
+@app.route("/test/force-perm-stuck/<uid>")
+def force_perm_stuck(uid):
+    u = get_user(uid)
+    if u:
+        u["provider_status"] = "Stuck"
+        u["reset_count"]     = 2
+        u["last_allowance"]  = time.time() - (8 * 86400)
+        save_user(u)
+    return f"Done — {uid} is permanently stuck"
+
+@app.route("/test/set-credits/<uid>/<int:amount>")
+def set_credits(uid, amount):
+    u = get_user(uid)
+    if u:
+        u["credits"] = amount
+        save_user(u)
+    return f"Done — {uid} now has {amount} credits"
+
+
 # ---------------------------
 # MAIN
 # ---------------------------
 
 if __name__ == "__main__":
     init_db()
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=False)
+    app.run(debug=True)
