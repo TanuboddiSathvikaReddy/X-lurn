@@ -842,11 +842,15 @@ async function loadCreditHistory() {
 
 // ── TABS ──
 function switchTab(id) {
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-'+id).classList.add('active');
-  document.querySelectorAll('.tab').forEach(t=>{ if(t.getAttribute('onclick')==="switchTab('"+id+"')")t.classList.add('active'); });
-  if(id==='credits') loadCreditHistory();
+  document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+  var page = document.getElementById('page-' + id);
+  if (page) page.classList.add('active');
+  document.querySelectorAll('.tab').forEach(function(t) {
+    var oc = t.getAttribute('onclick') || '';
+    if (oc.indexOf("switchTab('" + id + "')") !== -1) t.classList.add('active');
+  });
+  if (id === 'credits') loadCreditHistory();
 }
 
 // ── SKILLS PREVIEW ──
