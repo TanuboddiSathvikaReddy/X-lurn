@@ -982,7 +982,7 @@ async function generateQuestions() {
         max_tokens: 1000,
         messages: [{
           role: 'user',
-          content: 'Generate exactly 3 multiple choice questions to test someone's knowledge of "' + skill + '". Return ONLY valid JSON, no markdown, no explanation. Format: {"questions":[{"q":"question text","options":["option A","option B","option C"],"answer":0}]} where answer is the index (0,1,2) of the correct option. Make questions practical and specific to ' + skill + '.'
+          content: "Generate exactly 3 multiple choice questions to test someone's knowledge of '" + skill + "'. Return ONLY valid JSON, no markdown, no explanation. Format: {\"questions\":[{\"q\":\"question text\",\"options\":[\"option A\",\"option B\",\"option C\"],\"answer\":0}]} where answer is the index (0,1,2) of the correct option. Make questions practical and specific to " + skill + "."
         }]
       })
     });
