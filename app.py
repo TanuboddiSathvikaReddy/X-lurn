@@ -1192,17 +1192,14 @@ def test_gemini():
     api_key = os.environ.get("GEMINI_API_KEY", "")
     if not api_key:
         return "NO API KEY SET"
-    prompt = "Say hello in one word."
-    payload = json.dumps({
-        "contents": [{"parts": [{"text": prompt}]}]
-    }).encode("utf-8")
+    # First list available models
     try:
-        url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=" + api_key
-        req = urllib.request.Request(url, data=payload,
-            headers={"Content-Type": "application/json"}, method="POST")
+        url = "https://generativelanguage.googleapis.com/v1beta/models?key=" + api_key
+        req = urllib.request.Request(url, method="GET")
         with urllib.request.urlopen(req, timeout=15) as resp:
             result = json.loads(resp.read().decode("utf-8"))
-        return "SUCCESS: " + str(result["candidates"][0]["content"]["parts"][0]["text"])
+        models = [m["name"] for m in result.get("models", [])]
+        return "AVAILABLE MODELS: " + ", ".join(models)
     except urllib.error.HTTPError as e:
         return "HTTP ERROR " + str(e.code) + ": " + e.read().decode("utf-8")
     except Exception as e:
@@ -1240,7 +1237,7 @@ def generate_questions():
         return jsonify({"success": False, "error": "No API key configured"}), 500
 
     try:
-        url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=" + api_key
+        url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + api_key
         req = urllib.request.Request(
             url,
             data=payload,
