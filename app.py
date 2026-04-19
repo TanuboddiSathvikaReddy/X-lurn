@@ -9,7 +9,8 @@ import json
 app = Flask(__name__)
 app.secret_key = "xlurn_secret_2024"
 
-DB_PATH = os.environ.get("DB_PATH", "/data/xlurn.db")
+DB_PATH = "xlurn.db"
+
 # ---------------------------
 # CONSTANTS
 # ---------------------------
@@ -31,9 +32,6 @@ MAX_FILE_BYTES         = 5 * 1024 * 1024
 
 def get_db():
     """Get a database connection with row_factory so rows behave like dicts."""
-    db_dir = os.path.dirname(DB_PATH)
-    if db_dir:
-        os.makedirs(db_dir, exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA journal_mode=WAL")
@@ -1208,37 +1206,24 @@ def generate_questions():
     )
 
     payload = json.dumps({
-        "model": "claude-haiku-4-5-20251001",
-        "max_tokens": 800,
-        "messages": [{"role": "user", "content": prompt}]
+        "contents": [{"parts": [{"text": prompt}]}]
     }).encode("utf-8")
 
-    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+    api_key = os.environ.get("GEMINI_API_KEY", "")
     if not api_key:
-        # Fallback: return generic questions if no API key
-        return jsonify({"success": True, "questions": [
-            {"q": "What is a fundamental concept in " + skill + "?",
-             "options": ["Basics", "Advanced", "Expert"], "answer": 0},
-            {"q": "How long does it typically take to learn " + skill + "?",
-             "options": ["Days", "Weeks to months", "Years of practice"], "answer": 1},
-            {"q": "Which is most important when learning " + skill + "?",
-             "options": ["Practice", "Theory only", "Neither"], "answer": 0}
-        ]})
+        return jsonify({"success": False, "error": "No API key configured"}), 500
 
     try:
+        url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + api_key
         req = urllib.request.Request(
-            "https://api.anthropic.com/v1/messages",
+            url,
             data=payload,
-            headers={
-                "Content-Type": "application/json",
-                "x-api-key": api_key,
-                "anthropic-version": "2023-06-01"
-            },
+            headers={"Content-Type": "application/json"},
             method="POST"
         )
         with urllib.request.urlopen(req, timeout=15) as resp:
             result = json.loads(resp.read().decode("utf-8"))
-        text = result["content"][0]["text"].strip()
+        text = result["candidates"][0]["content"]["parts"][0]["text"].strip()
         text = text.replace("```json", "").replace("```", "").strip()
         parsed = json.loads(text)
         return jsonify({"success": True, "questions": parsed["questions"]})
@@ -1390,5 +1375,4 @@ def set_credits(uid, amount):
 
 if __name__ == "__main__":
     init_db()
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=False)
+    app.run(debug=True)
