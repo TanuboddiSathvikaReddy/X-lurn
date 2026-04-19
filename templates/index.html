@@ -714,13 +714,24 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{ a.addEventListener('click
 <div class="modal-bg" id="test-modal">
   <div class="modal">
     <h3>Skill Test</h3>
-    <p>Score ≥70% earns bonus credits and ⭐ verified status immediately.</p>
-    <div class="form-group" style="margin-bottom:16px"><label>Skill to Test</label><input type="text" id="test-skill-inp" placeholder="e.g. Python"></div>
-    <div class="test-q"><div class="q-text">Q1. How do you define a function in Python?</div><div class="test-opt"><input type="radio" name="q1" id="q1a" value="1"><label for="q1a">def my_func():</label></div><div class="test-opt"><input type="radio" name="q1" id="q1b" value="0"><label for="q1b">function my_func():</label></div><div class="test-opt"><input type="radio" name="q1" id="q1c" value="0"><label for="q1c">func my_func():</label></div></div>
-    <div class="test-q"><div class="q-text">Q2. Which data structure uses LIFO order?</div><div class="test-opt"><input type="radio" name="q2" id="q2a" value="0"><label for="q2a">Queue</label></div><div class="test-opt"><input type="radio" name="q2" id="q2b" value="1"><label for="q2b">Stack</label></div><div class="test-opt"><input type="radio" name="q2" id="q2c" value="0"><label for="q2c">Heap</label></div></div>
-    <div class="test-q"><div class="q-text">Q3. What does O(1) mean?</div><div class="test-opt"><input type="radio" name="q3" id="q3a" value="1"><label for="q3a">Constant time</label></div><div class="test-opt"><input type="radio" name="q3" id="q3b" value="0"><label for="q3b">Linear time</label></div><div class="test-opt"><input type="radio" name="q3" id="q3c" value="0"><label for="q3c">Logarithmic time</label></div></div>
-    <div id="test-result" style="font-size:13px;font-weight:600;margin-top:14px;font-family:'Geist Mono',monospace"></div>
-    <div class="modal-footer"><button class="btn btn-green" onclick="submitTest()">Submit</button><button class="btn btn-ghost" onclick="closeModal()">Cancel</button></div>
+    <p>Score ≥70% earns bonus credits and ⭐ verified status immediately. Questions are generated for your specific skill.</p>
+    <div class="form-group" style="margin-bottom:16px">
+      <label>Skill to Test</label>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="test-skill-inp" placeholder="e.g. Guitar, Python, Yoga" style="flex:1">
+        <button class="btn btn-ink btn-sm" onclick="generateQuestions()" id="gen-btn">Generate →</button>
+      </div>
+    </div>
+    <div id="questions-loading" style="display:none;text-align:center;padding:24px;color:var(--sub);font-size:13px;font-family:'JetBrains Mono',monospace">
+      <div style="font-size:24px;margin-bottom:8px">⚡</div>
+      Generating questions for your skill…
+    </div>
+    <div id="questions-container" style="display:none"></div>
+    <div id="test-result" style="font-size:13px;font-weight:600;margin-top:14px;font-family:'JetBrains Mono',monospace"></div>
+    <div class="modal-footer">
+      <button class="btn btn-green" onclick="submitTest()" id="submit-test-btn" style="display:none">Submit Answers</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    </div>
   </div>
 </div>
 
@@ -919,19 +930,113 @@ async function disputeRequest(reqId,btn){
 }
 
 // ── SKILL TEST ──
-function openTestModal(){document.getElementById('test-modal').classList.add('open');document.getElementById('test-result').textContent='';['q1','q2','q3'].forEach(q=>document.querySelectorAll(`input[name="${q}"]`).forEach(r=>r.checked=false));}
-function closeModal(){document.querySelectorAll('.modal-bg').forEach(m=>m.classList.remove('open'));}
-async function submitTest(){
-  const skill=document.getElementById('test-skill-inp').value.trim();
-  if(!skill){document.getElementById('test-result').textContent='⚠ Enter skill name';return;}
-  let correct=0;['q1','q2','q3'].forEach(q=>{const s=document.querySelector(`input[name="${q}"]:checked`);if(s&&s.value==='1')correct++;});
-  const score=Math.round((correct/3)*100);
-  const res=await fetch('/skill-test',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({skill,score})});
-  const data=await res.json();
-  const el=document.getElementById('test-result');
-  el.style.color=score>=70?'var(--green)':'var(--red)';
-  el.textContent=score>=70?`✓ ${score}% — ${data.verified?'⭐ Verified!':'Passed!'} +${data.bonus} credits`:`✗ ${score}% — Need ≥70%`;
-  setTimeout(()=>{closeModal();location.reload();},2000);
+function openTestModal() {
+  document.getElementById('test-modal').classList.add('open');
+  document.getElementById('test-result').textContent = '';
+  document.getElementById('test-skill-inp').value = '';
+  document.getElementById('questions-container').style.display = 'none';
+  document.getElementById('questions-container').innerHTML = '';
+  document.getElementById('questions-loading').style.display = 'none';
+  document.getElementById('submit-test-btn').style.display = 'none';
+  currentQuestions = [];
+}
+function closeModal() {
+  document.querySelectorAll('.modal-bg').forEach(function(m) { m.classList.remove('open'); });
+}
+
+var currentQuestions = [];
+
+async function generateQuestions() {
+  var skill = document.getElementById('test-skill-inp').value.trim();
+  if (!skill) {
+    document.getElementById('test-result').textContent = '⚠ Enter a skill first';
+    document.getElementById('test-result').style.color = 'var(--red)';
+    return;
+  }
+  var genBtn = document.getElementById('gen-btn');
+  var loading = document.getElementById('questions-loading');
+  var container = document.getElementById('questions-container');
+  var submitBtn = document.getElementById('submit-test-btn');
+  var resultEl = document.getElementById('test-result');
+
+  genBtn.disabled = true;
+  genBtn.textContent = '…';
+  loading.style.display = 'block';
+  container.style.display = 'none';
+  container.innerHTML = '';
+  submitBtn.style.display = 'none';
+  resultEl.textContent = '';
+
+  try {
+    var response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{
+          role: 'user',
+          content: 'Generate exactly 3 multiple choice questions to test someone's knowledge of "' + skill + '". Return ONLY valid JSON, no markdown, no explanation. Format: {"questions":[{"q":"question text","options":["option A","option B","option C"],"answer":0}]} where answer is the index (0,1,2) of the correct option. Make questions practical and specific to ' + skill + '.'
+        }]
+      })
+    });
+
+    var data = await response.json();
+    var text = data.content[0].text.trim();
+    // Strip any markdown fences if present
+    text = text.replace(/```json/g, '').replace(/```/g, '').trim();
+    var parsed = JSON.parse(text);
+    currentQuestions = parsed.questions;
+
+    loading.style.display = 'none';
+    container.style.display = 'block';
+    container.innerHTML = currentQuestions.map(function(q, i) {
+      return '<div class="test-q">' +
+        '<div class="q-text">Q' + (i+1) + '. ' + q.q + '</div>' +
+        q.options.map(function(opt, j) {
+          return '<div class="test-opt">' +
+            '<input type="radio" name="q' + i + '" id="q' + i + '_' + j + '" value="' + j + '">' +
+            '<label for="q' + i + '_' + j + '">' + opt + '</label>' +
+            '</div>';
+        }).join('') +
+        '</div>';
+    }).join('');
+    submitBtn.style.display = 'inline-flex';
+
+  } catch(e) {
+    loading.style.display = 'none';
+    resultEl.style.color = 'var(--red)';
+    resultEl.textContent = '✗ Could not generate questions. Try again.';
+    console.error(e);
+  }
+
+  genBtn.disabled = false;
+  genBtn.textContent = 'Generate →';
+}
+
+async function submitTest() {
+  var skill = document.getElementById('test-skill-inp').value.trim();
+  if (!skill || currentQuestions.length === 0) return;
+
+  var correct = 0;
+  currentQuestions.forEach(function(q, i) {
+    var selected = document.querySelector('input[name="q' + i + '"]:checked');
+    if (selected && parseInt(selected.value) === q.answer) correct++;
+  });
+
+  var score = Math.round((correct / currentQuestions.length) * 100);
+  var res = await fetch('/skill-test', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({skill: skill, score: score})
+  });
+  var data = await res.json();
+  var el = document.getElementById('test-result');
+  el.style.color = score >= 70 ? 'var(--green)' : 'var(--red)';
+  el.textContent = score >= 70
+    ? '✓ ' + score + '% — ' + (data.verified ? '⭐ Verified!' : 'Passed!') + ' +' + data.bonus + ' credits'
+    : '✗ ' + score + '% — Need ≥70% to pass';
+  setTimeout(function() { closeModal(); location.reload(); }, 2000);
 }
 
 // ── CONFIRM MODAL ──
