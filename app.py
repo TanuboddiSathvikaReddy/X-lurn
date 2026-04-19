@@ -1214,7 +1214,7 @@ def generate_questions():
         return jsonify({"success": False, "error": "No API key configured"}), 500
 
     try:
-        url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + api_key
+        url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + api_key
         req = urllib.request.Request(
             url,
             data=payload,
@@ -1225,8 +1225,16 @@ def generate_questions():
             result = json.loads(resp.read().decode("utf-8"))
         text = result["candidates"][0]["content"]["parts"][0]["text"].strip()
         text = text.replace("```json", "").replace("```", "").strip()
+        # Find JSON in response
+        start = text.find("{")
+        end   = text.rfind("}") + 1
+        if start != -1 and end > start:
+            text = text[start:end]
         parsed = json.loads(text)
         return jsonify({"success": True, "questions": parsed["questions"]})
+    except urllib.error.HTTPError as e:
+        body = e.read().decode("utf-8")
+        return jsonify({"success": False, "error": "HTTP " + str(e.code) + ": " + body[:200]}), 500
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
