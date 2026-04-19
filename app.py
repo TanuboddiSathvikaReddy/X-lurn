@@ -1197,7 +1197,7 @@ def test_gemini():
         "contents": [{"parts": [{"text": prompt}]}]
     }).encode("utf-8")
     try:
-        url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + api_key
+        url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=" + api_key
         req = urllib.request.Request(url, data=payload,
             headers={"Content-Type": "application/json"}, method="POST")
         with urllib.request.urlopen(req, timeout=15) as resp:
@@ -1240,7 +1240,7 @@ def generate_questions():
         return jsonify({"success": False, "error": "No API key configured"}), 500
 
     try:
-        url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + api_key
+        url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=" + api_key
         req = urllib.request.Request(
             url,
             data=payload,
