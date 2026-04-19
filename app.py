@@ -1287,39 +1287,6 @@ def chat_poll(req_id):
         m["id"] = since + i
     return jsonify({"success": True, "messages": new_msgs, "total": total})
 
-
-# ---------------------------
-# TEST ROUTES (remove before production)
-# ---------------------------
-
-@app.route("/test/force-stuck/<uid>")
-def force_stuck(uid):
-    u = get_user(uid)
-    if u:
-        u["provider_status"] = "Stuck"
-        u["stuck_since"]     = time.time() - (31 * 86400)
-        save_user(u)
-    return f"Done — {uid} is now stuck and past cooldown"
-
-@app.route("/test/force-perm-stuck/<uid>")
-def force_perm_stuck(uid):
-    u = get_user(uid)
-    if u:
-        u["provider_status"] = "Stuck"
-        u["reset_count"]     = 2
-        u["last_allowance"]  = time.time() - (8 * 86400)
-        save_user(u)
-    return f"Done — {uid} is permanently stuck"
-
-@app.route("/test/set-credits/<uid>/<int:amount>")
-def set_credits(uid, amount):
-    u = get_user(uid)
-    if u:
-        u["credits"] = amount
-        save_user(u)
-    return f"Done — {uid} now has {amount} credits"
-
-
 # ---------------------------
 # MAIN
 # ---------------------------
