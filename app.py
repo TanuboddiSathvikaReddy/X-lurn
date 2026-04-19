@@ -1183,6 +1183,32 @@ def credit_history():
 
 
 # ---------------------------
+# GEMINI DEBUG ROUTE
+# ---------------------------
+
+@app.route("/test-gemini")
+def test_gemini():
+    import urllib.request, urllib.error
+    api_key = os.environ.get("GEMINI_API_KEY", "")
+    if not api_key:
+        return "NO API KEY SET"
+    prompt = "Say hello in one word."
+    payload = json.dumps({
+        "contents": [{"parts": [{"text": prompt}]}]
+    }).encode("utf-8")
+    try:
+        url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + api_key
+        req = urllib.request.Request(url, data=payload,
+            headers={"Content-Type": "application/json"}, method="POST")
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            result = json.loads(resp.read().decode("utf-8"))
+        return "SUCCESS: " + str(result["candidates"][0]["content"]["parts"][0]["text"])
+    except urllib.error.HTTPError as e:
+        return "HTTP ERROR " + str(e.code) + ": " + e.read().decode("utf-8")
+    except Exception as e:
+        return "ERROR: " + str(e)
+
+# ---------------------------
 # SKILL TEST QUESTIONS ROUTE
 # ---------------------------
 
