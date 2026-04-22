@@ -1219,7 +1219,7 @@ def generate_questions():
             "parameters": {"max_new_tokens": 800, "temperature": 0.7, "return_full_text": False}
         }).encode("utf-8")
         req = urllib.request.Request(
-            "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2",
+            "https://api-inference.huggingface.co/models/mistralai/Mixtral-8x7B-Instruct-v0.1",
             data=hf_payload,
             headers={
                 "Content-Type": "application/json",
