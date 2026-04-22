@@ -814,7 +814,7 @@ def dashboard():
         reset_eligible=reset_eligible, reset_reason=reset_reason,
         resets_left=resets_left, days_until_reset=days_until_reset,
         my_reviews=my_reviews,
-        gemini_key=os.environ.get("GEMINI_API_KEY", ""),
+        groq_key=os.environ.get("GROQ_API_KEY", ""),
         users_count=0, pending_count=0, assigned_count=0,
         completed_count=0, connections_count=0,
         all_users=[], pq_items=[], req_details=[], conn_details=[],
