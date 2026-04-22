@@ -814,6 +814,7 @@ def dashboard():
         reset_eligible=reset_eligible, reset_reason=reset_reason,
         resets_left=resets_left, days_until_reset=days_until_reset,
         my_reviews=my_reviews,
+        gemini_key=os.environ.get("GEMINI_API_KEY", ""),
         users_count=0, pending_count=0, assigned_count=0,
         completed_count=0, connections_count=0,
         all_users=[], pq_items=[], req_details=[], conn_details=[],
@@ -1196,46 +1197,34 @@ def generate_questions():
     if not skill:
         return jsonify({"success": False, "error": "Skill required"}), 400
 
-    prompt = (
-        "[INST] Generate exactly 3 multiple choice questions to test knowledge of " + skill + ". "
-        "Return ONLY valid JSON, no explanation, no markdown. "
-        'Format: {"questions":[{"q":"question","options":["A","B","C"],"answer":0}]} '
-        "where answer is index 0,1,2 of correct option. [/INST]"
-    )
+    fmt = '{' + '"questions":[{"q":"question","options":["A","B","C"],"answer":0}]' + '}'
+    prompt = "Generate exactly 3 multiple choice questions to test knowledge of " + skill + ". Return ONLY valid JSON no markdown. Format: " + fmt + " where answer is index 0,1,2 of correct option. Make questions specific to " + skill + "."
 
-    api_key = os.environ.get("HF_API_KEY", "")
+    api_key = os.environ.get("GEMINI_API_KEY", "")
     if not api_key:
-        return jsonify({"success": False, "error": "No API key"}), 500
+        return jsonify({"success": False, "error": "No API key configured"}), 500
 
     try:
-        hf_payload = json.dumps({
-            "model": "HuggingFaceH4/zephyr-7b-beta",
-            "messages": [{"role": "user", "content": prompt}],
-            "max_tokens": 500,
-            "temperature": 0.3
+        payload = json.dumps({
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {"temperature": 0.7, "maxOutputTokens": 800}
         }).encode("utf-8")
-        req = urllib.request.Request(
-            "https://router.huggingface.co/hf-inference/models/HuggingFaceH4/zephyr-7b-beta/v1/chat/completions",
-            data=hf_payload,
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + api_key
-            },
-            method="POST"
-        )
-        with urllib.request.urlopen(req, timeout=60) as resp:
+        url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + api_key
+        req = urllib.request.Request(url, data=payload,
+            headers={"Content-Type": "application/json"}, method="POST")
+        with urllib.request.urlopen(req, timeout=15) as resp:
             result = json.loads(resp.read().decode("utf-8"))
-        text = result["choices"][0]["message"]["content"]
+        text = result["candidates"][0]["content"]["parts"][0]["text"].strip()
         text = text.replace("```json", "").replace("```", "").strip()
-        start_idx = text.find("{")
-        end_idx   = text.rfind("}") + 1
-        if start_idx != -1 and end_idx > start_idx:
-            text = text[start_idx:end_idx]
+        si = text.find("{")
+        ei = text.rfind("}") + 1
+        if si != -1 and ei > si:
+            text = text[si:ei]
         parsed = json.loads(text)
         return jsonify({"success": True, "questions": parsed["questions"]})
     except urllib.error.HTTPError as e:
         body = e.read().decode("utf-8")
-        return jsonify({"success": False, "error": "HTTP " + str(e.code) + ": " + body[:300]}), 500
+        return jsonify({"success": False, "error": "HTTP " + str(e.code) + ": " + body[:200]}), 500
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
