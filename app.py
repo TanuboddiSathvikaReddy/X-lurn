@@ -1209,19 +1209,20 @@ def generate_questions():
         "contents": [{"parts": [{"text": prompt}]}]
     }).encode("utf-8")
 
-    api_key = os.environ.get("DEEPSEEK_API_KEY", "")
+    api_key = os.environ.get("GROQ_API_KEY", "")
     if not api_key:
         return jsonify({"success": False, "error": "No API key configured"}), 500
 
     try:
-        ds_payload = json.dumps({
-            "model": "deepseek-chat",
+        groq_payload = json.dumps({
+            "model": "llama3-8b-8192",
             "messages": [{"role": "user", "content": prompt}],
-            "max_tokens": 800
+            "max_tokens": 800,
+            "temperature": 0.7
         }).encode("utf-8")
         req = urllib.request.Request(
-            "https://api.deepseek.com/v1/chat/completions",
-            data=ds_payload,
+            "https://api.groq.com/openai/v1/chat/completions",
+            data=groq_payload,
             headers={
                 "Content-Type": "application/json",
                 "Authorization": "Bearer " + api_key
