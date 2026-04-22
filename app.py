@@ -1209,16 +1209,13 @@ def generate_questions():
 
     try:
         hf_payload = json.dumps({
-            "inputs": prompt,
-            "parameters": {
-                "max_new_tokens": 500,
-                "temperature": 0.3,
-                "return_full_text": False,
-                "stop": ["</s>", "[INST]"]
-            }
+            "model": "mistralai/Mistral-7B-Instruct-v0.3",
+            "messages": [{"role": "user", "content": prompt}],
+            "max_tokens": 500,
+            "temperature": 0.3
         }).encode("utf-8")
         req = urllib.request.Request(
-            "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3",
+            "https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.3/v1/chat/completions",
             data=hf_payload,
             headers={
                 "Content-Type": "application/json",
@@ -1228,10 +1225,7 @@ def generate_questions():
         )
         with urllib.request.urlopen(req, timeout=60) as resp:
             result = json.loads(resp.read().decode("utf-8"))
-        if isinstance(result, list):
-            text = result[0].get("generated_text", "")
-        else:
-            text = result.get("generated_text", str(result))
+        text = result["choices"][0]["message"]["content"]
         text = text.replace("```json", "").replace("```", "").strip()
         start_idx = text.find("{")
         end_idx   = text.rfind("}") + 1
