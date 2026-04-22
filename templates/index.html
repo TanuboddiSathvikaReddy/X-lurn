@@ -974,16 +974,21 @@ async function generateQuestions() {
   resultEl.textContent = '';
 
   try {
-    var GEMINI_KEY = '{{ gemini_key }}';
+    var GROQ_KEY = '{{ groq_key }}';
     var fmt = '{"questions":[{"q":"question","options":["A","B","C"],"answer":0}]}';
-    var prompt = 'Generate exactly 3 multiple choice questions to test knowledge of ' + skill + '. Return ONLY valid JSON no markdown. Format: ' + fmt + ' where answer is index 0,1,2 of correct option. Make questions specific to ' + skill + '.';
+    var prompt = 'Generate exactly 3 multiple choice questions to test knowledge of ' + skill + '. Return ONLY valid JSON no markdown no explanation. Format: ' + fmt + ' where answer is index 0,1,2 of correct option. Make questions practical and specific to ' + skill + '.';
 
-    var response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + GEMINI_KEY, {
+    var response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + GROQ_KEY
+      },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.7, maxOutputTokens: 800 }
+        model: 'llama3-8b-8192',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 800,
+        temperature: 0.7
       })
     });
 
@@ -993,7 +998,7 @@ async function generateQuestions() {
     }
 
     var data = await response.json();
-    var text = data.candidates[0].content.parts[0].text.trim();
+    var text = data.choices[0].message.content.trim();
     text = text.replace(/```json/g, '').replace(/```/g, '').trim();
     var si = text.indexOf('{');
     var ei = text.lastIndexOf('}') + 1;
