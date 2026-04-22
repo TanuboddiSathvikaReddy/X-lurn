@@ -1190,36 +1190,35 @@ def credit_history():
 def generate_questions():
     if "user_id" not in session:
         return jsonify({"success": False, "error": "Not logged in"}), 401
-    import urllib.request
-    import urllib.error
+    import urllib.request, urllib.error
     data  = request.get_json()
     skill = (data.get("skill") or "").strip()
     if not skill:
         return jsonify({"success": False, "error": "Skill required"}), 400
 
     prompt = (
-        "Generate exactly 3 multiple choice questions to test knowledge of \"" + skill + "\". "
-        "Return ONLY valid JSON with no markdown or explanation. "
-        "Format: {\"questions\":[{\"q\":\"question\",\"options\":[\"A\",\"B\",\"C\"],\"answer\":0}]} "
-        "where answer is the index (0,1,2) of the correct option. "
-        "Make questions practical and specific to " + skill + "."
+        "[INST] Generate exactly 3 multiple choice questions to test knowledge of " + skill + ". "
+        "Return ONLY valid JSON, no explanation, no markdown. "
+        'Format: {"questions":[{"q":"question","options":["A","B","C"],"answer":0}]} '
+        "where answer is index 0,1,2 of correct option. [/INST]"
     )
-
-    payload = json.dumps({
-        "contents": [{"parts": [{"text": prompt}]}]
-    }).encode("utf-8")
 
     api_key = os.environ.get("HF_API_KEY", "")
     if not api_key:
-        return jsonify({"success": False, "error": "No API key configured"}), 500
+        return jsonify({"success": False, "error": "No API key"}), 500
 
     try:
         hf_payload = json.dumps({
             "inputs": prompt,
-            "parameters": {"max_new_tokens": 800, "temperature": 0.7, "return_full_text": False}
+            "parameters": {
+                "max_new_tokens": 500,
+                "temperature": 0.3,
+                "return_full_text": False,
+                "stop": ["</s>", "[INST]"]
+            }
         }).encode("utf-8")
         req = urllib.request.Request(
-            "https://api-inference.huggingface.co/models/mistralai/Mixtral-8x7B-Instruct-v0.1",
+            "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3",
             data=hf_payload,
             headers={
                 "Content-Type": "application/json",
@@ -1227,23 +1226,22 @@ def generate_questions():
             },
             method="POST"
         )
-        with urllib.request.urlopen(req, timeout=30) as resp:
+        with urllib.request.urlopen(req, timeout=60) as resp:
             result = json.loads(resp.read().decode("utf-8"))
-        # HF returns a list
         if isinstance(result, list):
             text = result[0].get("generated_text", "")
         else:
-            text = result.get("generated_text", "")
+            text = result.get("generated_text", str(result))
         text = text.replace("```json", "").replace("```", "").strip()
-        start = text.find("{")
-        end   = text.rfind("}") + 1
-        if start != -1 and end > start:
-            text = text[start:end]
+        start_idx = text.find("{")
+        end_idx   = text.rfind("}") + 1
+        if start_idx != -1 and end_idx > start_idx:
+            text = text[start_idx:end_idx]
         parsed = json.loads(text)
         return jsonify({"success": True, "questions": parsed["questions"]})
     except urllib.error.HTTPError as e:
         body = e.read().decode("utf-8")
-        return jsonify({"success": False, "error": "HTTP " + str(e.code) + ": " + body[:200]}), 500
+        return jsonify({"success": False, "error": "HTTP " + str(e.code) + ": " + body[:300]}), 500
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
