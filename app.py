@@ -1209,13 +1209,13 @@ def generate_questions():
 
     try:
         hf_payload = json.dumps({
-            "model": "mistralai/Mistral-7B-Instruct-v0.3",
+            "model": "HuggingFaceH4/zephyr-7b-beta",
             "messages": [{"role": "user", "content": prompt}],
             "max_tokens": 500,
             "temperature": 0.3
         }).encode("utf-8")
         req = urllib.request.Request(
-            "https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.3/v1/chat/completions",
+            "https://router.huggingface.co/hf-inference/models/HuggingFaceH4/zephyr-7b-beta/v1/chat/completions",
             data=hf_payload,
             headers={
                 "Content-Type": "application/json",
