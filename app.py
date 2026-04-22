@@ -1214,7 +1214,7 @@ def generate_questions():
         return jsonify({"success": False, "error": "No API key configured"}), 500
 
     try:
-        url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + api_key
+        url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=" + api_key
         req = urllib.request.Request(
             url,
             data=payload,
