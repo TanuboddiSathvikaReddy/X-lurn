@@ -1209,23 +1209,29 @@ def generate_questions():
         "contents": [{"parts": [{"text": prompt}]}]
     }).encode("utf-8")
 
-    api_key = os.environ.get("GEMINI_API_KEY", "")
+    api_key = os.environ.get("DEEPSEEK_API_KEY", "")
     if not api_key:
         return jsonify({"success": False, "error": "No API key configured"}), 500
 
     try:
-        url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=" + api_key
+        ds_payload = json.dumps({
+            "model": "deepseek-chat",
+            "messages": [{"role": "user", "content": prompt}],
+            "max_tokens": 800
+        }).encode("utf-8")
         req = urllib.request.Request(
-            url,
-            data=payload,
-            headers={"Content-Type": "application/json"},
+            "https://api.deepseek.com/v1/chat/completions",
+            data=ds_payload,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + api_key
+            },
             method="POST"
         )
         with urllib.request.urlopen(req, timeout=15) as resp:
             result = json.loads(resp.read().decode("utf-8"))
-        text = result["candidates"][0]["content"]["parts"][0]["text"].strip()
+        text = result["choices"][0]["message"]["content"].strip()
         text = text.replace("```json", "").replace("```", "").strip()
-        # Find JSON in response
         start = text.find("{")
         end   = text.rfind("}") + 1
         if start != -1 and end > start:
