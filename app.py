@@ -1209,29 +1209,31 @@ def generate_questions():
         "contents": [{"parts": [{"text": prompt}]}]
     }).encode("utf-8")
 
-    api_key = os.environ.get("GROQ_API_KEY", "")
+    api_key = os.environ.get("HF_API_KEY", "")
     if not api_key:
         return jsonify({"success": False, "error": "No API key configured"}), 500
 
     try:
-        groq_payload = json.dumps({
-            "model": "llama3-8b-8192",
-            "messages": [{"role": "user", "content": prompt}],
-            "max_tokens": 800,
-            "temperature": 0.7
+        hf_payload = json.dumps({
+            "inputs": prompt,
+            "parameters": {"max_new_tokens": 800, "temperature": 0.7, "return_full_text": False}
         }).encode("utf-8")
         req = urllib.request.Request(
-            "https://api.groq.com/openai/v1/chat/completions",
-            data=groq_payload,
+            "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2",
+            data=hf_payload,
             headers={
                 "Content-Type": "application/json",
                 "Authorization": "Bearer " + api_key
             },
             method="POST"
         )
-        with urllib.request.urlopen(req, timeout=15) as resp:
+        with urllib.request.urlopen(req, timeout=30) as resp:
             result = json.loads(resp.read().decode("utf-8"))
-        text = result["choices"][0]["message"]["content"].strip()
+        # HF returns a list
+        if isinstance(result, list):
+            text = result[0].get("generated_text", "")
+        else:
+            text = result.get("generated_text", "")
         text = text.replace("```json", "").replace("```", "").strip()
         start = text.find("{")
         end   = text.rfind("}") + 1
