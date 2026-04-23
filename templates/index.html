@@ -233,6 +233,10 @@ td{padding:13px 22px;font-size:13px;color:var(--sub);border-bottom:1px solid rgb
 .cstar:hover,.cstar.on{color:var(--gold);transform:scale(1.1)}.star:hover,.star.on{color:var(--gold);transform:scale(1.1)}
 #match-result{display:none;background:var(--greeng);border:1px solid rgba(31,217,138,.2);border-left:3px solid var(--green);border-radius:10px;padding:12px 18px;font-size:13px;color:var(--green);font-weight:600;margin-bottom:20px;font-family:monospace}
 #match-result.show{display:block;animation:fadeUp .3s ease both}
+.forensic-card{background:var(--bg3);border:1px solid var(--border2);border-radius:12px;padding:16px;margin-top:8px}
+.forensic-warn{background:var(--redg);border:1px solid rgba(255,77,106,.2);border-radius:8px;padding:8px 12px;margin:4px 0;font-size:11px;color:var(--red)}
+.forensic-note{background:var(--greeng);border:1px solid rgba(31,217,138,.2);border-radius:8px;padding:8px 12px;margin:4px 0;font-size:11px;color:var(--green)}
+.ela-img{width:120px;height:auto;border-radius:8px;border:1px solid var(--border2);margin-top:8px;cursor:pointer;transition:width .2s}
 </style>
 </head>
 <body>
@@ -529,22 +533,8 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{ a.addEventListener('click
         </div>
         {% else %}<a href="/proof-file/{{ p.uid }}/{{ p.skill }}/{{ p.index }}" target="_blank" class="proof-pdf">📄 PDF</a>{% endif %}
       </td>
-      <td style="min-width:200px">
-        {% if p.trust_score is not none %}
-        <div style="margin-bottom:8px">
-          <span style="font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px;font-family:monospace;
-            {% if p.trust_level == 'HIGH' %}background:var(--greeng);color:var(--green);border:1px solid rgba(31,217,138,.2)
-            {% elif p.trust_level == 'MEDIUM' %}background:var(--amberg);color:var(--amber);border:1px solid rgba(245,166,35,.2)
-            {% else %}background:var(--redg);color:var(--red);border:1px solid rgba(255,77,106,.2){% endif %}">
-            {% if p.trust_level == 'HIGH' %}✅{% elif p.trust_level == 'MEDIUM' %}⚠{% else %}🚨{% endif %}
-            {{ p.trust_level }} ({{ p.trust_score }}%)
-          </span>
-        </div>
-        {% for pos in p.positives %}<div style="font-size:11px;color:var(--green);margin-bottom:3px">{{ pos }}</div>{% endfor %}
-        {% for flag in p.flags %}<div style="font-size:11px;color:var(--red);margin-bottom:3px">{{ flag }}</div>{% endfor %}
-        {% else %}
-        <span style="font-size:11px;color:var(--muted);font-family:monospace">No scan data</span>
-        {% endif %}
+      <td style="min-width:180px" id="forensic-col-{{ p.uid }}-{{ p.skill }}-{{ p.index }}">
+        <span style="font-size:11px;color:var(--muted);font-family:monospace">Click 🔬 Scan</span>
       </td>
       <td>
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">
@@ -1187,6 +1177,24 @@ async function runForensic(uid, skill, index, btn) {
     }
     html += '</div>';
     resultDiv.innerHTML = html;
+    // Also update the forensic report column
+    var colDiv = document.getElementById('forensic-col-' + uid + '-' + skill + '-' + index);
+    if (colDiv) {
+      var trustColor = data.trust === 'high' ? 'var(--green)' : data.trust === 'medium' ? 'var(--amber)' : 'var(--red)';
+      var trustIcon  = data.trust === 'high' ? '✅' : data.trust === 'medium' ? '⚠️' : '🚨';
+      var colHtml = '<span style="font-size:11px;font-weight:700;color:' + trustColor + '">' + trustIcon + ' ' + data.trust.toUpperCase() + '</span>';
+      if (data.warnings && data.warnings.length) {
+        data.warnings.forEach(function(w) {
+          colHtml += '<div style="font-size:10px;color:var(--red);margin-top:3px">⚠ ' + w + '</div>';
+        });
+      }
+      if (data.notes && data.notes.length) {
+        data.notes.forEach(function(n) {
+          colHtml += '<div style="font-size:10px;color:var(--green);margin-top:3px">✓ ' + n + '</div>';
+        });
+      }
+      colDiv.innerHTML = colHtml;
+    }
   } catch(e) {
     resultDiv.innerHTML = '<div class="forensic-warn">✗ Scan failed: ' + e.message + '</div>';
   }
