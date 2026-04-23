@@ -1181,17 +1181,26 @@ async function runForensic(uid, skill, index, btn) {
     var colDiv = document.getElementById('forensic-col-' + uid + '-' + skill + '-' + index);
     if (colDiv) {
       var trustColor = data.trust === 'high' ? 'var(--green)' : data.trust === 'medium' ? 'var(--amber)' : 'var(--red)';
+      var trustBg    = data.trust === 'high' ? 'var(--greeng)' : data.trust === 'medium' ? 'var(--amberg)' : 'var(--redg)';
+      var trustBdr   = data.trust === 'high' ? 'rgba(31,217,138,.2)' : data.trust === 'medium' ? 'rgba(245,166,35,.2)' : 'rgba(255,77,106,.2)';
       var trustIcon  = data.trust === 'high' ? '✅' : data.trust === 'medium' ? '⚠️' : '🚨';
-      var colHtml = '<span style="font-size:11px;font-weight:700;color:' + trustColor + '">' + trustIcon + ' ' + data.trust.toUpperCase() + '</span>';
+      var colHtml = '<div style="margin-bottom:6px">';
+      colHtml += '<span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:' + trustBg + ';color:' + trustColor + ';border:1px solid ' + trustBdr + '">';
+      colHtml += trustIcon + ' ' + data.trust.toUpperCase() + '</span></div>';
       if (data.warnings && data.warnings.length) {
+        colHtml += '<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Warnings</div>';
         data.warnings.forEach(function(w) {
-          colHtml += '<div style="font-size:10px;color:var(--red);margin-top:3px">⚠ ' + w + '</div>';
+          colHtml += '<div style="font-size:11px;color:var(--red);margin-bottom:3px;display:flex;gap:4px"><span>⚠</span><span>' + w + '</span></div>';
         });
       }
       if (data.notes && data.notes.length) {
+        colHtml += '<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:6px;margin-bottom:3px">Details</div>';
         data.notes.forEach(function(n) {
-          colHtml += '<div style="font-size:10px;color:var(--green);margin-top:3px">✓ ' + n + '</div>';
+          colHtml += '<div style="font-size:11px;color:var(--sub);margin-bottom:3px;display:flex;gap:4px"><span style="color:var(--green)">✓</span><span>' + n + '</span></div>';
         });
+      }
+      if ((!data.warnings || !data.warnings.length) && (!data.notes || !data.notes.length)) {
+        colHtml += '<div style="font-size:11px;color:var(--muted)">No details available</div>';
       }
       colDiv.innerHTML = colHtml;
     }

@@ -1036,47 +1036,81 @@ def run_forensic_scan(file_bytes, mime_type, filename):
     is_image = mime_type.startswith("image/") and "gif" not in mime_type
     is_pdf   = mime_type == "application/pdf"
 
+    # Software that is genuinely suspicious on certificates
+    # (image editors — why would you need these for a certificate?)
+    SUSPICIOUS_SOFTWARE = ['photoshop', 'gimp', 'pixlr', 'picsart', 'paint.net',
+                           'affinity photo', 'inkscape']
+
+    # Software that is normal — people make portfolios and docs with these
+    NORMAL_SOFTWARE     = ['canva', 'word', 'libreoffice', 'google', 'pages',
+                           'powerpoint', 'keynote', 'latex', 'acrobat', 'adobe acrobat',
+                           'foxit', 'nitro', 'wps', 'openoffice']
+
     if is_image:
         # Run ELA
         ela = ela_analysis(file_bytes)
         result["ela"] = ela
         if ela["success"]:
-            if ela["score"] > 60:
-                result["warnings"].append(f"High ELA suspicion score: {ela['score']}/100 — possible editing detected")
-            elif ela["score"] > 30:
-                result["warnings"].append(f"Moderate ELA score: {ela['score']}/100 — review carefully")
+            if ela["score"] > 65:
+                result["warnings"].append(
+                    f"ELA suspicion score high ({ela['score']}/100) — possible pasting or editing detected")
+            elif ela["score"] > 40:
+                result["notes"].append(
+                    f"ELA score moderate ({ela['score']}/100) — minor compression differences, review image")
             else:
-                result["notes"].append(f"ELA score: {ela['score']}/100 — looks clean")
+                result["notes"].append(f"ELA score clean ({ela['score']}/100) — no obvious edits detected")
 
         # Run metadata
         meta = extract_image_metadata(file_bytes)
         result["meta"] = meta
         if not meta["has_exif"]:
-            result["warnings"].append("No EXIF metadata found — may be screenshot or stripped")
+            # No EXIF is common for screenshots and WhatsApp shares — note, not warning
+            result["notes"].append("No EXIF metadata — likely a screenshot or shared file")
         else:
-            if meta["editing_detected"]:
-                result["warnings"].append(f"Editing software detected: {meta['software']}")
-            else:
-                result["notes"].append(f"Device: {meta['device']}")
+            software = meta["software"].lower()
+            if any(s in software for s in SUSPICIOUS_SOFTWARE):
+                result["warnings"].append(
+                    f"Image editing software detected: {meta['software']} — verify authenticity")
+            elif meta["device"] and meta["device"] != "Unknown":
+                result["notes"].append(f"Captured on: {meta['device']}")
             if meta["capture_date"] != "Unknown":
-                result["notes"].append(f"Captured: {meta['capture_date']}")
+                result["notes"].append(f"Capture date: {meta['capture_date']}")
+            if meta["software"] != "Unknown" and not any(
+                    s in software for s in SUSPICIOUS_SOFTWARE):
+                result["notes"].append(f"Software: {meta['software']}")
 
     elif is_pdf:
         meta = extract_pdf_metadata(file_bytes)
         result["meta"] = meta
         if meta["success"]:
-            if meta["editing_detected"]:
-                result["warnings"].append(f"Editing software detected: {meta['creator']}")
-            else:
-                result["notes"].append(f"Creator: {meta['creator']}")
-            if meta["author"] != "Unknown":
-                result["notes"].append(f"Author: {meta['author']}")
-        else:
-            result["warnings"].append("Could not read PDF metadata")
-    else:
-        result["notes"].append("File type not supported for forensic scan")
+            creator  = meta["creator"].lower()
+            producer = meta["producer"].lower()
+            combined = creator + " " + producer
 
-    # Overall trust level
+            if any(s in combined for s in SUSPICIOUS_SOFTWARE):
+                # Image editor used to make a PDF — very suspicious
+                result["warnings"].append(
+                    f"Image editing software detected: {meta['creator']} — not typical for certificates")
+            elif any(s in combined for s in NORMAL_SOFTWARE):
+                # Normal document software — just a note
+                result["notes"].append(
+                    f"Created with: {meta['creator']} — common document tool")
+            elif meta["creator"] != "Unknown":
+                result["notes"].append(f"Creator software: {meta['creator']}")
+            else:
+                result["notes"].append("No creator software info in PDF")
+
+            if meta["author"] not in ("Unknown", ""):
+                result["notes"].append(f"Author field: {meta['author']}")
+            if meta["creation_date"] not in ("Unknown", ""):
+                result["notes"].append(f"Created: {meta['creation_date'][:20]}")
+        else:
+            # Can't read PDF metadata — just a note, not a warning
+            result["notes"].append("PDF metadata not readable (may be encrypted or older format)")
+    else:
+        result["notes"].append("File type not fully supported for forensic scan")
+
+    # Trust logic — only real red flags trigger warnings
     warn_count = len(result["warnings"])
     if warn_count == 0:
         result["trust"] = "high"
