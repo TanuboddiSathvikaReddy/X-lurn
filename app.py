@@ -1024,7 +1024,7 @@ def extract_pdf_metadata(pdf_bytes):
                 "editing_detected": False}
 
 
-def run_forensic_scan(file_bytes, mime_type, filename):
+def run_forensic_scan(file_bytes, mime_type, filename, uploader_name=""):
     """Run full forensic scan on uploaded proof file."""
     result = {
         "ela":      None,
@@ -1075,6 +1075,18 @@ def run_forensic_scan(file_bytes, mime_type, filename):
                 result["notes"].append(f"Captured on: {meta['device']}")
             if meta["capture_date"] != "Unknown":
                 result["notes"].append(f"Capture date: {meta['capture_date']}")
+            # Check artist/copyright field against uploader name
+            artist = meta.get("raw", {}).get("Artist", "") or meta.get("raw", {}).get("Copyright", "")
+            if artist and uploader_name:
+                uploader_lower = uploader_name.lower()
+                artist_lower   = artist.lower()
+                name_parts = [p for p in uploader_lower.split() if len(p) > 2]
+                match = any(part in artist_lower for part in name_parts)
+                if match:
+                    result["notes"].append(f"Artist field matches uploader — consistent")
+                elif artist:
+                    result["warnings"].append(
+                        f"Artist field mismatch — image shows '{artist}' but uploader is '{uploader_name}'")
             if meta["software"] != "Unknown" and not any(
                     s in software for s in SUSPICIOUS_SOFTWARE):
                 result["notes"].append(f"Software: {meta['software']}")
@@ -1101,7 +1113,20 @@ def run_forensic_scan(file_bytes, mime_type, filename):
                 result["notes"].append("No creator software info in PDF")
 
             if meta["author"] not in ("Unknown", ""):
-                result["notes"].append(f"Author field: {meta['author']}")
+                author = meta["author"].strip()
+                result["notes"].append(f"Author field: {author}")
+                # Check if author matches uploader
+                if uploader_name:
+                    uploader_lower = uploader_name.lower()
+                    author_lower   = author.lower()
+                    # Check if any word in uploader name appears in author field
+                    name_parts = [p for p in uploader_lower.split() if len(p) > 2]
+                    match = any(part in author_lower for part in name_parts) or                             any(part in uploader_lower for part in author_lower.split() if len(part) > 2)
+                    if match:
+                        result["notes"].append(f"Author matches uploader name — consistent")
+                    else:
+                        result["warnings"].append(
+                            f"Author name mismatch — PDF author is '{author}' but uploader is '{uploader_name}'")
             if meta["creation_date"] not in ("Unknown", ""):
                 result["notes"].append(f"Created: {meta['creation_date'][:20]}")
         else:
@@ -1140,7 +1165,8 @@ def forensic_scan(uid, skill, index):
         return jsonify({"error": "Proof not found"}), 404
     proof      = proofs[0]
     file_bytes = base64.b64decode(proof["data"])
-    result     = run_forensic_scan(file_bytes, proof["mime"], proof["filename"])
+    uploader_name = u.get("name", "")
+    result     = run_forensic_scan(file_bytes, proof["mime"], proof["filename"], uploader_name)
     # Remove heavy ela_b64 from ela dict for the JSON response
     # but keep it accessible for the heatmap endpoint
     ela_b64 = None
