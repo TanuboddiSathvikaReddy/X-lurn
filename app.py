@@ -744,9 +744,15 @@ def dashboard():
             for sk, sd in usr.get("skill_data", {}).items():
                 for p in sd.get("proofs", []):
                     if p.get("type") == "file" and p.get("approved") is None:
+                        forensic = p.get("forensic", {})
                         pending_proofs.append({"uid": usr["id"], "name": usr["name"],
                                                "skill": sk, "filename": p.get("filename", ""),
-                                               "mime": p.get("mime", ""), "index": p.get("index", 0)})
+                                               "mime": p.get("mime", ""), "index": p.get("index", 0),
+                                               "trust_score": forensic.get("trust_score", None),
+                                               "trust_level": forensic.get("trust_level", "UNKNOWN"),
+                                               "flags": forensic.get("flags", []),
+                                               "positives": forensic.get("positives", []),
+                                               "has_ela": bool(forensic.get("ela", {}) and forensic.get("ela", {}).get("ela_image"))})
 
         return render_template("index.html", logged_in=True, user=u,
             users_count=len(all_users), pending_count=pending_count,
@@ -919,6 +925,224 @@ def proof_file(uid, skill, index):
     file_bytes = base64.b64decode(proof["data"])
     return Response(file_bytes, mimetype=proof["mime"],
                     headers={"Content-Disposition": f'inline; filename="{proof["filename"]}"'})
+
+
+# ---------------------------
+# FORENSIC ANALYSIS
+# ---------------------------
+
+def ela_analysis(image_bytes):
+    """Run Error Level Analysis on image bytes. Returns score and heatmap."""
+    try:
+        from PIL import Image, ImageChops, ImageEnhance
+        import io, base64
+        original = Image.open(io.BytesIO(image_bytes)).convert('RGB')
+        buf = io.BytesIO()
+        original.save(buf, format='JPEG', quality=90)
+        buf.seek(0)
+        compressed = Image.open(buf).convert('RGB')
+        ela_img = ImageChops.difference(original, compressed)
+        extrema = ela_img.getextrema()
+        max_diff = max([ex[1] for ex in extrema]) or 1
+        scale = 255.0 / max_diff
+        ela_img = ImageEnhance.Brightness(ela_img).enhance(scale)
+        # Suspicion score — avg pixel brightness
+        pixels = list(ela_img.getdata())
+        avg = sum(sum(p) / 3 for p in pixels) / len(pixels)
+        score = min(100, int(avg * 2))
+        out = io.BytesIO()
+        ela_img.save(out, format='PNG')
+        ela_b64 = base64.b64encode(out.getvalue()).decode('utf-8')
+        return {"score": score, "ela_b64": ela_b64, "success": True}
+    except Exception as e:
+        return {"score": -1, "ela_b64": None, "success": False, "error": str(e)}
+
+
+def extract_image_metadata(image_bytes):
+    """Extract EXIF metadata from image."""
+    try:
+        from PIL import Image
+        from PIL.ExifTags import TAGS
+        import io
+        img = Image.open(io.BytesIO(image_bytes))
+        exif_data = {}
+        if hasattr(img, '_getexif') and img._getexif():
+            for tag, value in img._getexif().items():
+                tag_name = TAGS.get(tag, tag)
+                if tag_name in ['Make', 'Model', 'Software', 'DateTime',
+                                 'DateTimeOriginal', 'Artist', 'Copyright']:
+                    exif_data[tag_name] = str(value)[:100]
+        software    = exif_data.get('Software', '').lower()
+        edit_tools  = ['photoshop', 'gimp', 'canva', 'paint', 'illustrator',
+                       'lightroom', 'snapseed', 'picsart', 'pixlr', 'inshot']
+        editing     = any(s in software for s in edit_tools)
+        device      = (exif_data.get('Make', '') + ' ' + exif_data.get('Model', '')).strip()
+        return {
+            "success":          True,
+            "has_exif":         len(exif_data) > 0,
+            "device":           device or "Unknown",
+            "software":         exif_data.get('Software', 'Unknown'),
+            "capture_date":     exif_data.get('DateTimeOriginal', exif_data.get('DateTime', 'Unknown')),
+            "editing_detected": editing,
+            "raw":              exif_data
+        }
+    except Exception as e:
+        return {"success": False, "error": str(e), "has_exif": False,
+                "device": "Unknown", "software": "Unknown",
+                "capture_date": "Unknown", "editing_detected": False}
+
+
+def extract_pdf_metadata(pdf_bytes):
+    """Extract metadata from PDF files."""
+    try:
+        import fitz  # PyMuPDF
+        import io
+        doc = fitz.open(stream=pdf_bytes, filetype="pdf")
+        meta = doc.metadata
+        doc.close()
+        creator  = meta.get('creator', '') or ''
+        producer = meta.get('producer', '') or ''
+        edit_tools = ['photoshop', 'gimp', 'canva', 'word', 'libreoffice']
+        editing  = any(s in creator.lower() or s in producer.lower() for s in edit_tools)
+        return {
+            "success":          True,
+            "creator":          creator or "Unknown",
+            "producer":         producer or "Unknown",
+            "author":           meta.get('author', 'Unknown') or "Unknown",
+            "creation_date":    meta.get('creationDate', 'Unknown') or "Unknown",
+            "editing_detected": editing,
+        }
+    except ImportError:
+        return {"success": False, "error": "PyMuPDF not installed",
+                "creator": "Unknown", "producer": "Unknown",
+                "author": "Unknown", "creation_date": "Unknown",
+                "editing_detected": False}
+    except Exception as e:
+        return {"success": False, "error": str(e),
+                "creator": "Unknown", "producer": "Unknown",
+                "author": "Unknown", "creation_date": "Unknown",
+                "editing_detected": False}
+
+
+def run_forensic_scan(file_bytes, mime_type, filename):
+    """Run full forensic scan on uploaded proof file."""
+    result = {
+        "ela":      None,
+        "meta":     None,
+        "trust":    "unknown",
+        "warnings": [],
+        "notes":    []
+    }
+    is_image = mime_type.startswith("image/") and "gif" not in mime_type
+    is_pdf   = mime_type == "application/pdf"
+
+    if is_image:
+        # Run ELA
+        ela = ela_analysis(file_bytes)
+        result["ela"] = ela
+        if ela["success"]:
+            if ela["score"] > 60:
+                result["warnings"].append(f"High ELA suspicion score: {ela['score']}/100 — possible editing detected")
+            elif ela["score"] > 30:
+                result["warnings"].append(f"Moderate ELA score: {ela['score']}/100 — review carefully")
+            else:
+                result["notes"].append(f"ELA score: {ela['score']}/100 — looks clean")
+
+        # Run metadata
+        meta = extract_image_metadata(file_bytes)
+        result["meta"] = meta
+        if not meta["has_exif"]:
+            result["warnings"].append("No EXIF metadata found — may be screenshot or stripped")
+        else:
+            if meta["editing_detected"]:
+                result["warnings"].append(f"Editing software detected: {meta['software']}")
+            else:
+                result["notes"].append(f"Device: {meta['device']}")
+            if meta["capture_date"] != "Unknown":
+                result["notes"].append(f"Captured: {meta['capture_date']}")
+
+    elif is_pdf:
+        meta = extract_pdf_metadata(file_bytes)
+        result["meta"] = meta
+        if meta["success"]:
+            if meta["editing_detected"]:
+                result["warnings"].append(f"Editing software detected: {meta['creator']}")
+            else:
+                result["notes"].append(f"Creator: {meta['creator']}")
+            if meta["author"] != "Unknown":
+                result["notes"].append(f"Author: {meta['author']}")
+        else:
+            result["warnings"].append("Could not read PDF metadata")
+    else:
+        result["notes"].append("File type not supported for forensic scan")
+
+    # Overall trust level
+    warn_count = len(result["warnings"])
+    if warn_count == 0:
+        result["trust"] = "high"
+    elif warn_count == 1:
+        result["trust"] = "medium"
+    else:
+        result["trust"] = "low"
+
+    return result
+
+
+@app.route("/forensic-scan/<uid>/<skill>/<int:index>")
+def forensic_scan(uid, skill, index):
+    """Run forensic scan on a proof file and return results."""
+    if "user_id" not in session:
+        return jsonify({"error": "Not logged in"}), 401
+    admin = get_user(session["user_id"])
+    if admin["role"] != "admin":
+        return jsonify({"error": "Admins only"}), 403
+    u = get_user(uid)
+    if not u:
+        return jsonify({"error": "User not found"}), 404
+    sd     = u.get("skill_data", {}).get(skill, {})
+    proofs = [p for p in sd.get("proofs", []) if p.get("type") == "file"
+              and p.get("index") == index]
+    if not proofs:
+        return jsonify({"error": "Proof not found"}), 404
+    proof      = proofs[0]
+    file_bytes = base64.b64decode(proof["data"])
+    result     = run_forensic_scan(file_bytes, proof["mime"], proof["filename"])
+    # Remove heavy ela_b64 from ela dict for the JSON response
+    # but keep it accessible for the heatmap endpoint
+    ela_b64 = None
+    if result["ela"] and result["ela"].get("ela_b64"):
+        ela_b64 = result["ela"]["ela_b64"]
+        result["ela"] = {k: v for k, v in result["ela"].items() if k != "ela_b64"}
+    # Store ELA result in proof for heatmap access
+    u2 = get_user(uid)
+    sd2 = u2["skill_data"].get(skill, {})
+    for p in sd2.get("proofs", []):
+        if p.get("type") == "file" and p.get("index") == index:
+            p["ela_score"]   = result["ela"]["score"] if result["ela"] else None
+            p["ela_b64"]     = ela_b64
+            p["forensic"]    = result
+            break
+    save_user(u2)
+    result["ela_b64"] = ela_b64
+    return jsonify(result)
+
+
+@app.route("/ela-heatmap/<uid>/<skill>/<int:index>")
+def ela_heatmap(uid, skill, index):
+    """Serve ELA heatmap image for a proof file."""
+    if "user_id" not in session:
+        return "Not logged in", 401
+    admin = get_user(session["user_id"])
+    if admin["role"] != "admin":
+        return "Admins only", 403
+    u  = get_user(uid)
+    sd = u.get("skill_data", {}).get(skill, {}) if u else {}
+    for p in sd.get("proofs", []):
+        if p.get("type") == "file" and p.get("index") == index and p.get("ela_b64"):
+            img_bytes = base64.b64decode(p["ela_b64"])
+            return Response(img_bytes, mimetype="image/png",
+                            headers={"Content-Disposition": "inline"})
+    return "ELA not available — run scan first", 404
 
 
 @app.route("/skill-test", methods=["POST"])
