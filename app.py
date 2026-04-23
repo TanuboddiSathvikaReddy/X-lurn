@@ -1024,7 +1024,61 @@ def extract_pdf_metadata(pdf_bytes):
                 "editing_detected": False}
 
 
-def run_forensic_scan(file_bytes, mime_type, filename, uploader_name=""):
+def check_skill_keywords(file_bytes, mime_type, filename, skill):
+    """Check if the file content or filename contains keywords related to the skill."""
+    if not skill:
+        return None
+
+    skill_lower = skill.lower().strip()
+    skill_words = [w for w in skill_lower.split() if len(w) > 2]
+
+    found_in = []
+    text_content = ""
+
+    # Check filename first
+    fname_lower = filename.lower()
+    if any(w in fname_lower for w in skill_words) or skill_lower in fname_lower:
+        found_in.append("filename")
+
+    # Extract text from PDF
+    if mime_type == "application/pdf":
+        try:
+            import fitz, io
+            doc = fitz.open(stream=file_bytes, filetype="pdf")
+            for page in doc:
+                text_content += page.get_text().lower()
+                if len(text_content) > 8000:
+                    break
+            doc.close()
+        except Exception:
+            pass
+
+    # Check text content
+    if text_content:
+        if any(w in text_content for w in skill_words) or skill_lower in text_content:
+            found_in.append("document content")
+
+    if found_in:
+        return {
+            "found": True,
+            "where": found_in,
+            "message": f"✅ PDF matches skill — '{skill}' found in {', '.join(found_in)}"
+        }
+    elif text_content:
+        return {
+            "found": False,
+            "where": [],
+            "message": f"❌ PDF does NOT match skill — no mention of '{skill}' in document. This proof may be unrelated."
+        }
+    else:
+        return {
+            "found": None,
+            "where": [],
+            "message": f"⚠ Could not read PDF text — unable to verify if document is related to '{skill}'"
+        }
+
+
+def run_forensic_scan(file_bytes, mime_type, filename, uploader_name="", skill=""):
     """Run full forensic scan on uploaded proof file."""
     result = {
         "ela":      None,
@@ -1135,6 +1189,17 @@ def run_forensic_scan(file_bytes, mime_type, filename, uploader_name=""):
     else:
         result["notes"].append("File type not fully supported for forensic scan")
 
+    # Skill keyword check
+    if skill:
+        kw = check_skill_keywords(file_bytes, mime_type, filename, skill)
+        if kw:
+            if kw["found"] is True:
+                result["notes"].append(kw["message"])
+            elif kw["found"] is False:
+                result["warnings"].append(kw["message"])
+            else:
+                result["notes"].append(kw["message"])
+
     # Trust logic — only real red flags trigger warnings
     warn_count = len(result["warnings"])
     if warn_count == 0:
@@ -1166,7 +1231,7 @@ def forensic_scan(uid, skill, index):
     proof      = proofs[0]
     file_bytes = base64.b64decode(proof["data"])
     uploader_name = u.get("name", "")
-    result     = run_forensic_scan(file_bytes, proof["mime"], proof["filename"], uploader_name)
+    result     = run_forensic_scan(file_bytes, proof["mime"], proof["filename"], uploader_name, skill)
     # Remove heavy ela_b64 from ela dict for the JSON response
     # but keep it accessible for the heatmap endpoint
     ela_b64 = None
