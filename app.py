@@ -7,10 +7,10 @@ import sqlite3
 import json
 
 app = Flask(__name__)
-app.secret_key = "xlurn_secret_2024x"
+app.secret_key = "xlurn_secret_2024"
 
-import os
-DB_PATH = os.environ.get("DB_PATH", "xlurn.db")
+DB_PATH = "xlurn.db"
+
 # ---------------------------
 # CONSTANTS
 # ---------------------------
@@ -820,7 +820,7 @@ def dashboard():
         reset_eligible=reset_eligible, reset_reason=reset_reason,
         resets_left=resets_left, days_until_reset=days_until_reset,
         my_reviews=my_reviews,
-        groq_key=os.environ.get("GROQ_API_KEY", "MISSING"),
+        groq_key=os.environ.get("GROQ_API_KEY", ""),
         users_count=0, pending_count=0, assigned_count=0,
         completed_count=0, connections_count=0,
         all_users=[], pq_items=[], req_details=[], conn_details=[],
@@ -1685,6 +1685,19 @@ def chat_poll(req_id):
 
 
 # ---------------------------
+# DEBUG ROUTE
+# ---------------------------
+
+@app.route("/debug-env")
+def debug_env():
+    key = os.environ.get("GROQ_API_KEY", "NOT_FOUND")
+    return jsonify({
+        "GROQ_API_KEY_exists": bool(key),
+        "GROQ_API_KEY_prefix": key[:8] if key else "NONE",
+        "DB_PATH": os.environ.get("DB_PATH", "NOT_SET")
+    })
+
+# ---------------------------
 # TEST ROUTES (remove before production)
 # ---------------------------
 
@@ -1722,5 +1735,5 @@ def set_credits(uid, amount):
 
 if __name__ == "__main__":
     init_db()
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port, debug=False)
