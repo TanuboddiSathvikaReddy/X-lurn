@@ -390,7 +390,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{ a.addEventListener('click
     <div class="t-logo-name">X-Lurn</div>
   </div>
   <div class="topbar-right">
-    <script>var GK="{{ groq_key }}";</script>
+    <script>var GK="{{ groq_key }}";var GK2=GK;</script>
 {% if user.role != 'admin' %}
     <div class="chip chip-gray">{{ user.credits }} cr</div>
     <div class="chip {% if user.provider_status == 'Trusted' %}chip-green{% elif user.provider_status == 'Stuck' %}chip-amber{% else %}chip-blue{% endif %}">
