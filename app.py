@@ -1693,8 +1693,10 @@ def debug_env():
     key = os.environ.get("GROQ_API_KEY", "NOT_FOUND")
     return jsonify({
         "GROQ_API_KEY_exists": bool(key),
-        "GROQ_API_KEY_prefix": key[:8] if key else "NONE",
-        "DB_PATH": os.environ.get("DB_PATH", "NOT_SET")
+        "GROQ_API_KEY_length": len(key),
+        "GROQ_API_KEY_prefix": key[:12] if key else "NONE",
+        "DB_PATH": os.environ.get("DB_PATH", "NOT_SET"),
+        "all_env_keys": [k for k in os.environ.keys() if "GROQ" in k or "API" in k]
     })
 
 # ---------------------------
