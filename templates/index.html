@@ -390,7 +390,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{ a.addEventListener('click
     <div class="t-logo-name">X-Lurn</div>
   </div>
   <div class="topbar-right">
-    <meta name="gk" content="{{ groq_key }}">
+    <script>var GK="{{ groq_key }}";</script>
 {% if user.role != 'admin' %}
     <div class="chip chip-gray">{{ user.credits }} cr</div>
     <div class="chip {% if user.provider_status == 'Trusted' %}chip-green{% elif user.provider_status == 'Stuck' %}chip-amber{% else %}chip-blue{% endif %}">
@@ -997,7 +997,7 @@ async function generateQuestions() {
   resultEl.textContent = '';
 
   try {
-    var GROQ_KEY = document.querySelector('meta[name="gk"]').getAttribute('content');
+    var GROQ_KEY = GK;
     var fmt = '{"questions":[{"q":"question","options":["A","B","C"],"answer":0}]}';
     var prompt = 'Generate exactly 3 multiple choice questions to test knowledge of ' + skill + '. Return ONLY valid JSON no markdown no explanation. Format: ' + fmt + ' where answer is index 0,1,2 of correct option. Make questions practical and specific to ' + skill + '.';
 
