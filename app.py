@@ -9,7 +9,8 @@ import json
 app = Flask(__name__)
 app.secret_key = "xlurn_secret_2024"
 
-DB_PATH = "/data/xlurn.db"
+import os
+DB_PATH = os.environ.get("DB_PATH", "xlurn.db")
 # ---------------------------
 # CONSTANTS
 # ---------------------------
