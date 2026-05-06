@@ -997,7 +997,7 @@ async function generateQuestions() {
   resultEl.textContent = '';
 
   try {
-    var GROQ_KEY = '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';
+    var GROQ_KEY = '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';
     var fmt = '{"questions":[{"q":"question","options":["A","B","C"],"answer":0}]}';
     var prompt = 'Generate exactly 3 multiple choice questions to test knowledge of ' + skill + '. Return ONLY valid JSON no markdown no explanation. Format: ' + fmt + ' where answer is index 0,1,2 of correct option. Make questions practical and specific to ' + skill + '.';
 
